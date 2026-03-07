@@ -1,0 +1,83 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+  }
+
+  body {
+    @apply bg-dark text-white font-sans;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  :root {
+    --primary: #FF3D57;
+    --dark: #0A0A0F;
+    --dark-card: #12121A;
+    --dark-border: #1E1E2E;
+  }
+}
+
+@layer components {
+  .btn-primary {
+    @apply bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95;
+  }
+
+  .btn-ghost {
+    @apply border border-dark-border hover:border-primary text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200;
+  }
+
+  .card {
+    @apply bg-dark-card border border-dark-border rounded-2xl overflow-hidden;
+  }
+
+  .input {
+    @apply w-full bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+  }
+
+  .badge-open {
+    @apply badge bg-green-500/20 text-green-400;
+  }
+
+  .badge-closed {
+    @apply badge bg-red-500/20 text-red-400;
+  }
+
+  .badge-busy {
+    @apply badge bg-yellow-500/20 text-yellow-400;
+  }
+}
+
+/* Story ring animation */
+.story-ring {
+  background: linear-gradient(45deg, #FF3D57, #7B2FBE, #F4A229);
+  padding: 2px;
+  border-radius: 50%;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: #0A0A0F;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #1E1E2E;
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #FF3D57;
+}
