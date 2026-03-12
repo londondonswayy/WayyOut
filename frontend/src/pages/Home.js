@@ -68,12 +68,6 @@ export default function Home() {
             ))}
           </div>
 
-          <p className="text-gray-600 text-sm mb-14">
-            {t('home.search.or')}{' '}
-            <button onClick={() => dispatch(toggleAIChat())} className="text-primary hover:underline">
-              {t('home.search.askAI')}
-            </button>
-          </p>
 
           {/* Two signup paths */}
           {!isAuthenticated && (
