@@ -1,0 +1,66 @@
+{
+  "expo": {
+    "name": "WayyOut",
+    "slug": "wayyout",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#07071A"
+    },
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "app.wayyout.mobile",
+      "buildNumber": "1",
+      "infoPlist": {
+        "NSLocationWhenInUseUsageDescription": "WayyOut uses your location to show nearby venues.",
+        "NSCameraUsageDescription": "WayyOut uses your camera to post stories.",
+        "NSPhotoLibraryUsageDescription": "WayyOut accesses your photos to post stories.",
+        "UIUserInterfaceStyle": "Dark"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#07071A"
+      },
+      "package": "app.wayyout.mobile",
+      "versionCode": 1,
+      "permissions": [
+        "ACCESS_FINE_LOCATION",
+        "ACCESS_COARSE_LOCATION",
+        "CAMERA",
+        "READ_EXTERNAL_STORAGE"
+      ]
+    },
+    "web": {
+      "favicon": "./assets/favicon.png"
+    },
+    "plugins": [
+      "expo-font",
+      "expo-location",
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "WayyOut accesses your photos to post stories.",
+          "cameraPermission": "WayyOut uses your camera to post stories."
+        }
+      ],
+      [
+        "expo-splash-screen",
+        {
+          "backgroundColor": "#07071A"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": "YOUR_EAS_PROJECT_ID"
+      }
+    },
+    "owner": "YOUR_EXPO_USERNAME"
+  }
+}

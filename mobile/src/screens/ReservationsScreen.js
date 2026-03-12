@@ -106,13 +106,13 @@ export default function ReservationsScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#07071A' },
   filterRow: { flexDirection: 'row', paddingHorizontal: 16, paddingVertical: 12, gap: 8 },
-  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E' },
-  filterChipActive: { borderColor: '#FF3D57', backgroundColor: 'rgba(255,61,87,0.1)' },
+  filterChip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42' },
+  filterChipActive: { borderColor: '#7C3AED', backgroundColor: 'rgba(255,61,87,0.1)' },
   filterText: { color: '#9CA3AF', fontSize: 12, fontWeight: '500', textTransform: 'capitalize' },
-  filterTextActive: { color: '#FF3D57' },
-  card: { backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E', borderRadius: 16, padding: 16, marginBottom: 12 },
+  filterTextActive: { color: '#7C3AED' },
+  card: { backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42', borderRadius: 16, padding: 16, marginBottom: 12 },
   cardHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 4 },
   venueName: { fontSize: 16, fontWeight: '700', color: '#fff', flex: 1 },
   statusBadge: { paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },

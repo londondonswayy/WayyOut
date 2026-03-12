@@ -21,7 +21,12 @@ export const loginUser = createAsyncThunk('auth/login', async (data, { rejectWit
     localStorage.setItem('refresh_token', refresh);
     return { user, tokens: { access, refresh } };
   } catch (err) {
-    return rejectWithValue(err.response?.data || { error: 'Login failed' });
+    const payload = err.response?.data || {};
+    if (err.response?.status === 429) {
+      payload.userMessage = err.userMessage || 'Account locked due to too many failed attempts. Try again in 15 minutes.';
+      payload.status = 429;
+    }
+    return rejectWithValue(payload);
   }
 });
 

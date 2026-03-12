@@ -7,6 +7,7 @@ import LoginScreen from '../screens/LoginScreen';
 import RegisterScreen from '../screens/RegisterScreen';
 import VenueDetailScreen from '../screens/VenueDetailScreen';
 import StoriesScreen from '../screens/StoriesScreen';
+import PostStoryScreen from '../screens/PostStoryScreen';
 
 const Stack = createNativeStackNavigator();
 
@@ -17,10 +18,10 @@ export default function AppNavigator() {
     <NavigationContainer>
       <Stack.Navigator
         screenOptions={{
-          headerStyle: { backgroundColor: '#0A0A0F' },
+          headerStyle: { backgroundColor: '#07071A' },
           headerTintColor: '#fff',
           headerTitleStyle: { fontFamily: 'Poppins-SemiBold' },
-          contentStyle: { backgroundColor: '#0A0A0F' },
+          contentStyle: { backgroundColor: '#07071A' },
         }}
       >
         {isAuthenticated ? (
@@ -31,6 +32,11 @@ export default function AppNavigator() {
               name="Stories"
               component={StoriesScreen}
               options={{ headerShown: false, presentation: 'fullScreenModal' }}
+            />
+            <Stack.Screen
+              name="PostStory"
+              component={PostStoryScreen}
+              options={{ title: 'New Story', presentation: 'modal' }}
             />
           </>
         ) : (

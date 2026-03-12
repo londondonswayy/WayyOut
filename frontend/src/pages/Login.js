@@ -3,11 +3,13 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../store/slices/authSlice';
 import { toast } from 'react-toastify';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export default function Login() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, isAuthenticated, user } = useSelector((state) => state.auth);
+  const { t } = useTranslation();
   const [form, setForm] = useState({ email: '', password: '' });
 
   useEffect(() => {
@@ -20,15 +22,22 @@ export default function Login() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (loading) return;  // Prevent double-submit
     const result = await dispatch(loginUser(form));
     if (loginUser.fulfilled.match(result)) {
       toast.success(`Welcome back, ${result.payload.user.full_name.split(' ')[0]}!`);
+    } else {
+      const err = result.payload;
+      // Show lockout message if rate-limited
+      if (err?.status === 429 || err?.userMessage) {
+        toast.error(err.userMessage || 'Too many login attempts. Please wait 15 minutes.');
+      }
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4"
-      style={{ background: 'linear-gradient(135deg, #0A0A0F 0%, #1A0A2E 50%, #0A1628 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #07071A 0%, #12103A 50%, #07071A 100%)' }}>
       <div className="w-full max-w-md">
 
         {/* Logo */}
@@ -39,8 +48,8 @@ export default function Login() {
             </div>
             <span className="font-display font-bold text-2xl text-white">WayyOut</span>
           </Link>
-          <h1 className="font-display font-bold text-3xl text-white">Welcome back</h1>
-          <p className="text-gray-500 mt-1">Sign in to continue</p>
+          <h1 className="font-display font-bold text-3xl text-white">{t('login.title')}</h1>
+          <p className="text-gray-500 mt-1">{t('login.subtitle')}</p>
         </div>
 
         <div className="card p-8">
@@ -51,17 +60,17 @@ export default function Login() {
               </div>
             )}
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Email Address</label>
+              <label className="text-xs text-gray-400 mb-1 block">{t('login.email')}</label>
               <input type="email" required value={form.email} onChange={e => setForm({ ...form, email: e.target.value })}
                 placeholder="you@example.com" className="input" autoComplete="email" />
             </div>
             <div>
-              <label className="text-xs text-gray-400 mb-1 block">Password</label>
+              <label className="text-xs text-gray-400 mb-1 block">{t('login.password')}</label>
               <input type="password" required value={form.password} onChange={e => setForm({ ...form, password: e.target.value })}
                 placeholder="••••••••" className="input" autoComplete="current-password" />
             </div>
             <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-2">
-              {loading ? 'Signing in...' : 'Sign In'}
+              {loading ? t('login.loading') : t('login.submit')}
             </button>
           </form>
 

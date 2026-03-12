@@ -1,7 +1,30 @@
+import re
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from django.contrib.auth import authenticate
 from .models import User
+
+# Common weak / breached passwords to block
+WEAK_PASSWORDS = {'password', 'password1', '12345678', 'qwerty123', 'letmein1', 'welcome1', 'wayyout'}
+
+BLOCKED_ROLES = {'admin'}  # Users cannot self-assign admin role
+
+
+def validate_strong_password(value):
+    """Enforce password strength: 8+ chars, 1 uppercase, 1 digit."""
+    if len(value) < 8:
+        raise serializers.ValidationError('Password must be at least 8 characters.')
+    if not any(c.isupper() for c in value):
+        raise serializers.ValidationError('Password must contain at least one uppercase letter.')
+    if not any(c.isdigit() for c in value):
+        raise serializers.ValidationError('Password must contain at least one number.')
+    if value.lower() in WEAK_PASSWORDS:
+        raise serializers.ValidationError('This password is too common. Please choose a stronger one.')
+    return value
+
+
+def sanitize_text(value):
+    """Strip HTML/script tags from user-supplied text."""
+    return re.sub(r'<[^>]+>', '', value).strip() if value else value
 
 
 class UserRegistrationSerializer(serializers.ModelSerializer):
@@ -12,9 +35,34 @@ class UserRegistrationSerializer(serializers.ModelSerializer):
         model = User
         fields = ['email', 'full_name', 'phone', 'role', 'password', 'password_confirm']
 
+    def validate_password(self, value):
+        return validate_strong_password(value)
+
+    def validate_role(self, value):
+        if value in BLOCKED_ROLES:
+            raise serializers.ValidationError('Invalid role selection.')
+        return value
+
+    def validate_full_name(self, value):
+        value = sanitize_text(value)
+        if len(value) < 2:
+            raise serializers.ValidationError('Full name must be at least 2 characters.')
+        if len(value) > 150:
+            raise serializers.ValidationError('Full name is too long.')
+        return value
+
+    def validate_email(self, value):
+        value = value.lower().strip()
+        # Block disposable email domains (basic list — expand as needed)
+        disposable = {'mailinator.com', 'guerrillamail.com', 'tempmail.com', 'throwam.com', 'trashmail.com', 'yopmail.com'}
+        domain = value.split('@')[-1] if '@' in value else ''
+        if domain in disposable:
+            raise serializers.ValidationError('Disposable email addresses are not allowed.')
+        return value
+
     def validate(self, data):
         if data['password'] != data['password_confirm']:
-            raise serializers.ValidationError('Passwords do not match.')
+            raise serializers.ValidationError({'password_confirm': 'Passwords do not match.'})
         return data
 
     def create(self, validated_data):
@@ -38,6 +86,15 @@ class UserProfileUpdateSerializer(serializers.ModelSerializer):
         model = User
         fields = ['full_name', 'phone', 'bio', 'city', 'latitude', 'longitude', 'avatar', 'fcm_token']
 
+    def validate_bio(self, value):
+        return sanitize_text(value)[:500] if value else value
+
+    def validate_full_name(self, value):
+        value = sanitize_text(value)
+        if len(value) < 2:
+            raise serializers.ValidationError('Full name must be at least 2 characters.')
+        return value
+
 
 class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
@@ -49,6 +106,15 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
         return token
 
     def validate(self, attrs):
+        # Check if account is active before processing credentials
+        email = attrs.get('email', '').lower()
+        try:
+            user = User.objects.get(email=email)
+            if not user.is_active:
+                raise serializers.ValidationError('This account has been suspended. Please contact support.')
+        except User.DoesNotExist:
+            pass  # Let the parent handle invalid credentials uniformly
+
         data = super().validate(attrs)
         data['user'] = UserSerializer(self.user).data
         return data
@@ -59,7 +125,12 @@ class ChangePasswordSerializer(serializers.Serializer):
     new_password = serializers.CharField(min_length=8)
     new_password_confirm = serializers.CharField()
 
+    def validate_new_password(self, value):
+        return validate_strong_password(value)
+
     def validate(self, data):
         if data['new_password'] != data['new_password_confirm']:
-            raise serializers.ValidationError('New passwords do not match.')
+            raise serializers.ValidationError({'new_password_confirm': 'New passwords do not match.'})
+        if data['new_password'] == data['old_password']:
+            raise serializers.ValidationError({'new_password': 'New password must differ from the current password.'})
         return data

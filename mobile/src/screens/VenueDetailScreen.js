@@ -4,9 +4,11 @@ import {
   StyleSheet, Modal, TextInput, Alert, Platform
 } from 'react-native';
 import { venueAPI, reservationAPI } from '../services/api';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export default function VenueDetailScreen({ route }) {
   const { slug } = route.params;
+  const { t } = useTranslation();
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [reserveModal, setReserveModal] = useState(false);
@@ -29,16 +31,16 @@ export default function VenueDetailScreen({ route }) {
     try {
       await reservationAPI.create({ venue: venue.id, ...reserveForm });
       setReserveModal(false);
-      Alert.alert('Request Sent!', `Your reservation request has been sent to ${venue.name}. You'll be notified when they respond.`);
+      Alert.alert(t('res.sent'), t('res.sentDesc'));
     } catch {
-      Alert.alert('Error', 'Failed to send reservation. Please try again.');
+      Alert.alert('Error', t('res.error'));
     }
   };
 
   if (loading || !venue) {
     return (
       <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
-        <Text style={{ color: '#FF3D57', fontSize: 32 }}>W</Text>
+        <Text style={{ color: '#7C3AED', fontSize: 32 }}>W</Text>
       </View>
     );
   }
@@ -66,7 +68,7 @@ export default function VenueDetailScreen({ route }) {
             <Text style={styles.name}>{venue.name}</Text>
             <View style={[styles.statusBadge, venue.is_open ? styles.openBadge : styles.closedBadge]}>
               <Text style={[styles.statusText, { color: venue.is_open ? '#10B981' : '#EF4444' }]}>
-                {venue.is_open ? '● Open Now' : '● Closed'}
+                {venue.is_open ? t('detail.openNow') : t('detail.closed')}
               </Text>
             </View>
           </View>
@@ -91,9 +93,9 @@ export default function VenueDetailScreen({ route }) {
           {venue.is_open && (
             <View style={styles.busyContainer}>
               <View style={styles.busyHeader}>
-                <Text style={styles.busyLabel}>Busy Level</Text>
+                <Text style={styles.busyLabel}>{t('detail.busyLevel')}</Text>
                 <Text style={[styles.busyValue, { color: busyColor }]}>
-                  {venue.busy_level > 70 ? 'Very Busy' : venue.busy_level > 40 ? 'Moderate' : 'Quiet'}
+                  {venue.busy_level > 70 ? t('detail.veryBusy') : venue.busy_level > 40 ? t('detail.moderate') : t('detail.quiet')}
                 </Text>
               </View>
               <View style={styles.busyBar}>
@@ -103,13 +105,13 @@ export default function VenueDetailScreen({ route }) {
           )}
 
           {/* Description */}
-          <Text style={styles.sectionTitle}>About</Text>
+          <Text style={styles.sectionTitle}>{t('detail.about')}</Text>
           <Text style={styles.description}>{venue.description}</Text>
 
           {/* Contact */}
           {(venue.phone || venue.email) && (
             <>
-              <Text style={styles.sectionTitle}>Contact</Text>
+              <Text style={styles.sectionTitle}>{t('detail.contact')}</Text>
               {venue.phone && <Text style={styles.contact}>📞 {venue.phone}</Text>}
               {venue.email && <Text style={styles.contact}>✉️ {venue.email}</Text>}
             </>
@@ -123,7 +125,7 @@ export default function VenueDetailScreen({ route }) {
       {venue.is_open && (
         <View style={styles.footer}>
           <TouchableOpacity style={styles.reserveBtn} onPress={() => setReserveModal(true)}>
-            <Text style={styles.reserveBtnText}>Reserve Now</Text>
+            <Text style={styles.reserveBtnText}>{t('detail.reserveNow')}</Text>
           </TouchableOpacity>
         </View>
       )}
@@ -132,7 +134,7 @@ export default function VenueDetailScreen({ route }) {
       <Modal visible={reserveModal} animationType="slide" presentationStyle="pageSheet">
         <View style={styles.modalContainer}>
           <View style={styles.modalHeader}>
-            <Text style={styles.modalTitle}>Reserve a Spot</Text>
+            <Text style={styles.modalTitle}>{t('res.title')}</Text>
             <TouchableOpacity onPress={() => setReserveModal(false)}>
               <Text style={styles.modalClose}>✕</Text>
             </TouchableOpacity>
@@ -140,59 +142,59 @@ export default function VenueDetailScreen({ route }) {
 
           <ScrollView style={styles.modalBody} keyboardShouldPersistTaps="handled">
             {/* Type */}
-            <Text style={styles.fieldLabel}>Reservation Type</Text>
+            <Text style={styles.fieldLabel}>{t('res.type')}</Text>
             <View style={styles.typeRow}>
-              {['table', 'guest_list'].map((t) => (
+              {['table', 'guest_list'].map((type) => (
                 <TouchableOpacity
-                  key={t}
-                  onPress={() => setReserveForm({ ...reserveForm, reservation_type: t })}
-                  style={[styles.typeBtn, reserveForm.reservation_type === t && styles.typeBtnActive]}
+                  key={type}
+                  onPress={() => setReserveForm({ ...reserveForm, reservation_type: type })}
+                  style={[styles.typeBtn, reserveForm.reservation_type === type && styles.typeBtnActive]}
                 >
-                  <Text style={[styles.typeBtnText, reserveForm.reservation_type === t && styles.typeBtnTextActive]}>
-                    {t === 'table' ? '🪑 Table' : '📋 Guest List'}
+                  <Text style={[styles.typeBtnText, reserveForm.reservation_type === type && styles.typeBtnTextActive]}>
+                    {type === 'table' ? t('res.table') : t('res.guestList')}
                   </Text>
                 </TouchableOpacity>
               ))}
             </View>
 
-            <Text style={styles.fieldLabel}>Date</Text>
+            <Text style={styles.fieldLabel}>{t('res.date')}</Text>
             <TextInput
               style={styles.modalInput}
               value={reserveForm.date}
-              onChangeText={(t) => setReserveForm({ ...reserveForm, date: t })}
+              onChangeText={(v) => setReserveForm({ ...reserveForm, date: v })}
               placeholder="YYYY-MM-DD"
               placeholderTextColor="#6B7280"
             />
 
-            <Text style={styles.fieldLabel}>Time</Text>
+            <Text style={styles.fieldLabel}>{t('res.time')}</Text>
             <TextInput
               style={styles.modalInput}
               value={reserveForm.time}
-              onChangeText={(t) => setReserveForm({ ...reserveForm, time: t })}
+              onChangeText={(v) => setReserveForm({ ...reserveForm, time: v })}
               placeholder="HH:MM"
               placeholderTextColor="#6B7280"
             />
 
-            <Text style={styles.fieldLabel}>Party Size</Text>
+            <Text style={styles.fieldLabel}>{t('res.partySize')}</Text>
             <TextInput
               style={styles.modalInput}
               value={String(reserveForm.party_size)}
-              onChangeText={(t) => setReserveForm({ ...reserveForm, party_size: parseInt(t) || 1 })}
+              onChangeText={(v) => setReserveForm({ ...reserveForm, party_size: parseInt(v) || 1 })}
               keyboardType="number-pad"
             />
 
-            <Text style={styles.fieldLabel}>Special Requests (optional)</Text>
+            <Text style={styles.fieldLabel}>{t('res.special')}</Text>
             <TextInput
               style={[styles.modalInput, { height: 80, textAlignVertical: 'top' }]}
               value={reserveForm.special_requests}
-              onChangeText={(t) => setReserveForm({ ...reserveForm, special_requests: t })}
-              placeholder="Dietary needs, celebrations..."
+              onChangeText={(v) => setReserveForm({ ...reserveForm, special_requests: v })}
+              placeholder={t('res.specialPlaceholder')}
               placeholderTextColor="#6B7280"
               multiline
             />
 
             <TouchableOpacity style={styles.reserveBtn} onPress={handleReserve}>
-              <Text style={styles.reserveBtnText}>Send Request</Text>
+              <Text style={styles.reserveBtnText}>{t('res.send')}</Text>
             </TouchableOpacity>
 
             <View style={{ height: 40 }} />
@@ -204,7 +206,7 @@ export default function VenueDetailScreen({ route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#07071A' },
   coverContainer: { height: 240, position: 'relative' },
   cover: { width: '100%', height: '100%' },
   coverPlaceholder: { backgroundColor: '#1A1A2E', justifyContent: 'center', alignItems: 'center' },
@@ -223,28 +225,28 @@ const styles = StyleSheet.create({
   vibeText: { color: '#FF7087', fontSize: 11, fontWeight: '600', textTransform: 'capitalize' },
   catBadge: { backgroundColor: 'rgba(255,255,255,0.05)', paddingHorizontal: 10, paddingVertical: 3, borderRadius: 20 },
   catText: { color: '#9CA3AF', fontSize: 11 },
-  busyContainer: { marginTop: 16, backgroundColor: '#12121A', borderRadius: 12, padding: 14 },
+  busyContainer: { marginTop: 16, backgroundColor: '#0E0E28', borderRadius: 12, padding: 14 },
   busyHeader: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
   busyLabel: { color: '#9CA3AF', fontSize: 12 },
   busyValue: { fontSize: 12, fontWeight: '600' },
-  busyBar: { height: 6, backgroundColor: '#1E1E2E', borderRadius: 3, overflow: 'hidden' },
+  busyBar: { height: 6, backgroundColor: '#1C1C42', borderRadius: 3, overflow: 'hidden' },
   busyFill: { height: '100%', borderRadius: 3 },
   sectionTitle: { fontSize: 16, fontWeight: '700', color: '#fff', marginTop: 20, marginBottom: 8 },
   description: { color: '#9CA3AF', fontSize: 14, lineHeight: 22 },
   contact: { color: '#9CA3AF', fontSize: 14, marginBottom: 4 },
-  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#0A0A0F', borderTopWidth: 1, borderTopColor: '#1E1E2E' },
-  reserveBtn: { backgroundColor: '#FF3D57', borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
+  footer: { position: 'absolute', bottom: 0, left: 0, right: 0, padding: 16, backgroundColor: '#07071A', borderTopWidth: 1, borderTopColor: '#1C1C42' },
+  reserveBtn: { backgroundColor: '#7C3AED', borderRadius: 14, paddingVertical: 16, alignItems: 'center' },
   reserveBtnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
-  modalContainer: { flex: 1, backgroundColor: '#0A0A0F' },
-  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#1E1E2E' },
+  modalContainer: { flex: 1, backgroundColor: '#07071A' },
+  modalHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', padding: 20, borderBottomWidth: 1, borderBottomColor: '#1C1C42' },
   modalTitle: { fontSize: 18, fontWeight: '700', color: '#fff' },
   modalClose: { color: '#6B7280', fontSize: 20 },
   modalBody: { padding: 20 },
   fieldLabel: { color: '#9CA3AF', fontSize: 12, marginBottom: 6, marginTop: 16 },
-  modalInput: { backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, color: '#fff', fontSize: 14 },
+  modalInput: { backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42', borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, color: '#fff', fontSize: 14 },
   typeRow: { flexDirection: 'row', gap: 12 },
-  typeBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E', alignItems: 'center' },
-  typeBtnActive: { borderColor: '#FF3D57', backgroundColor: 'rgba(255,61,87,0.1)' },
+  typeBtn: { flex: 1, paddingVertical: 12, borderRadius: 12, backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42', alignItems: 'center' },
+  typeBtnActive: { borderColor: '#7C3AED', backgroundColor: 'rgba(255,61,87,0.1)' },
   typeBtnText: { color: '#9CA3AF', fontWeight: '500' },
-  typeBtnTextActive: { color: '#FF3D57' },
+  typeBtnTextActive: { color: '#7C3AED' },
 });

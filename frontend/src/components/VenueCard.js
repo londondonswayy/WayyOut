@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { openReservationModal } from '../store/slices/uiSlice';
+import { useTranslation } from '../i18n/LanguageContext';
 
 const VIBE_COLORS = {
   casual: 'bg-blue-500/20 text-blue-400',
@@ -13,8 +14,13 @@ const VIBE_COLORS = {
 
 function BusyBar({ level }) {
   const color = level > 70 ? 'bg-red-500' : level > 40 ? 'bg-yellow-500' : 'bg-green-500';
+  const pulseColor = level > 70 ? 'bg-red-400' : level > 40 ? 'bg-yellow-400' : 'bg-green-400';
   return (
     <div className="flex items-center space-x-2">
+      <span className="relative flex-shrink-0">
+        <span className={`absolute inline-flex h-2 w-2 rounded-full ${pulseColor} opacity-75 animate-ping`} />
+        <span className={`relative inline-flex rounded-full h-2 w-2 ${pulseColor}`} />
+      </span>
       <div className="flex-1 h-1.5 bg-dark-border rounded-full overflow-hidden">
         <div className={`h-full ${color} rounded-full transition-all`} style={{ width: `${level}%` }} />
       </div>
@@ -23,8 +29,34 @@ function BusyBar({ level }) {
   );
 }
 
-export default function VenueCard({ venue, compact = false }) {
+export default function VenueCard({ venue }) {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
+  const [saved, setSaved] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('saved_venues') || '[]').includes(venue.id);
+    } catch {
+      return false;
+    }
+  });
+  const [heartBounce, setHeartBounce] = useState(false);
+  const [viewerCount] = useState(() =>
+    Math.max(3, Math.floor((venue.busy_level || 0) / 8 + Math.random() * 10 + 2))
+  );
+
+  const toggleSave = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const next = !saved;
+    setSaved(next);
+    setHeartBounce(true);
+    setTimeout(() => setHeartBounce(false), 400);
+    try {
+      const all = JSON.parse(localStorage.getItem('saved_venues') || '[]');
+      const updated = next ? [...all, venue.id] : all.filter((id) => id !== venue.id);
+      localStorage.setItem('saved_venues', JSON.stringify(updated));
+    } catch {}
+  };
 
   return (
     <div className="card group hover:border-primary/50 transition-all duration-300 hover:-translate-y-1">
@@ -45,17 +77,41 @@ export default function VenueCard({ venue, compact = false }) {
         {/* Overlay badges */}
         <div className="absolute top-3 left-3 flex gap-2">
           {venue.is_open ? (
-            <span className="badge-open">● Open Now</span>
+            <span className="badge-open">{t('venue.open')}</span>
           ) : (
-            <span className="badge-closed">● Closed</span>
+            <span className="badge-closed">{t('venue.closed')}</span>
           )}
           {venue.is_featured && (
-            <span className="badge bg-accent-gold/20 text-yellow-400">★ Featured</span>
+            <span className="badge bg-accent-gold/20 text-yellow-400">{t('venue.featured')}</span>
           )}
         </div>
 
+        {/* Heart save button */}
+        <button
+          onClick={toggleSave}
+          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/70"
+          title={saved ? 'Remove from saved' : 'Save venue'}
+        >
+          <span
+            className={`text-lg transition-transform ${heartBounce ? 'scale-150' : 'scale-100'} ${saved ? 'text-red-500' : 'text-white/60 hover:text-white'}`}
+            style={{ transition: 'transform 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97)' }}
+          >
+            {saved ? '❤️' : '🤍'}
+          </span>
+        </button>
+
+        {/* Live viewer count */}
+        {venue.is_open && (
+          <div className="absolute bottom-3 left-3">
+            <span className="flex items-center gap-1 text-xs text-white/80 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+              <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
+              {viewerCount} {t('venue.viewing')}
+            </span>
+          </div>
+        )}
+
         {venue.category && (
-          <div className="absolute top-3 right-3">
+          <div className="absolute bottom-3 right-3">
             <span className="badge bg-dark/80 text-gray-300">{venue.category.name}</span>
           </div>
         )}
@@ -89,6 +145,9 @@ export default function VenueCard({ venue, compact = false }) {
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
               <span>Busy level</span>
+              <span className={venue.busy_level > 70 ? 'text-red-400' : venue.busy_level > 40 ? 'text-yellow-400' : 'text-green-400'}>
+                {venue.busy_level > 70 ? t('venue.packed') : venue.busy_level > 40 ? t('venue.moderate') : t('venue.quiet')}
+              </span>
             </div>
             <BusyBar level={venue.busy_level} />
           </div>
@@ -105,14 +164,14 @@ export default function VenueCard({ venue, compact = false }) {
             to={`/venue/${venue.slug}`}
             className="flex-1 btn-ghost text-sm py-2 text-center"
           >
-            View
+            {t('venue.view')}
           </Link>
           {venue.is_open && (
             <button
               onClick={() => dispatch(openReservationModal(venue))}
               className="flex-1 btn-primary text-sm py-2"
             >
-              Reserve
+              {t('venue.reserve')}
             </button>
           )}
         </div>

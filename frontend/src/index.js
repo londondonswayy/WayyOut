@@ -17,7 +17,7 @@ root.render(
         position="top-right"
         autoClose={4000}
         theme="dark"
-        toastStyle={{ backgroundColor: '#12121A', border: '1px solid #1E1E2E' }}
+        toastStyle={{ backgroundColor: '#0E0E28', border: '1px solid #1C1C42' }}
       />
     </BrowserRouter>
   </Provider>

@@ -6,12 +6,74 @@ import { venueAPI } from '../services/api';
 import StoriesFeed from '../components/StoriesFeed';
 import ReservationModal from '../components/ReservationModal';
 import { useSelector } from 'react-redux';
+import { useTranslation } from '../i18n/LanguageContext';
 
-const DAYS = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'];
+const AVATAR_COLORS = ['#7C3AED', '#14B8A6', '#F59E0B', '#EC4899', '#3B82F6', '#10B981'];
+const FIRST_NAMES = ['Alex', 'Sofia', 'Marcus', 'Priya', 'Jordan', 'Camille', 'Tyler', 'Mia', 'Noah', 'Léa'];
+// Actions are resolved via t() at render time
+
+function WhoIsGoing({ venue, t }) {
+  const [people] = useState(() => {
+    const count = Math.max(3, Math.floor((venue.busy_level || 30) / 10 + 2));
+    return Array.from({ length: Math.min(count, 8) }, (_, i) => ({
+      name: FIRST_NAMES[(i * 3 + venue.id) % FIRST_NAMES.length],
+      color: AVATAR_COLORS[i % AVATAR_COLORS.length],
+      actionKey: `going.action.${i % 5}`,
+      minsAgo: Math.floor(i * 4 + Math.random() * 8 + 1),
+    }));
+  });
+  const extraCount = Math.max(0, Math.floor((venue.busy_level || 30) / 5 + 5));
+
+  return (
+    <div className="card p-4 mb-6">
+      <div className="flex items-center justify-between mb-3">
+        <h3 className="font-semibold text-white text-sm">{t('detail.whoGoing')}</h3>
+        <span className="text-xs text-primary">{extraCount + people.length} {t('detail.people')}</span>
+      </div>
+      <div className="flex items-center gap-2 mb-3">
+        {people.slice(0, 6).map((p, i) => (
+          <div
+            key={i}
+            title={p.name}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ring-2 ring-dark-card"
+            style={{ backgroundColor: p.color, marginLeft: i > 0 ? '-8px' : 0 }}
+          >
+            {p.name[0]}
+          </div>
+        ))}
+        {extraCount > 0 && (
+          <div
+            className="w-8 h-8 rounded-full bg-dark-border flex items-center justify-center text-gray-400 text-xs font-bold flex-shrink-0 ring-2 ring-dark-card"
+            style={{ marginLeft: '-8px' }}
+          >
+            +{extraCount}
+          </div>
+        )}
+        <span className="text-gray-500 text-xs ml-2">{t('detail.andMore')}</span>
+      </div>
+      <div className="space-y-1.5 max-h-28 overflow-hidden">
+        {people.slice(0, 3).map((p, i) => (
+          <div key={i} className="flex items-center gap-2 text-xs text-gray-400">
+            <div
+              className="w-5 h-5 rounded-full flex items-center justify-center text-white text-[9px] font-bold flex-shrink-0"
+              style={{ backgroundColor: p.color }}
+            >
+              {p.name[0]}
+            </div>
+            <span className="text-white/70">{p.name}</span>
+            <span>{t(p.actionKey)}</span>
+            <span className="text-gray-600 ml-auto">{p.minsAgo}{t('detail.minsAgo')}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
 
 export default function VenueDetail() {
   const { slug } = useParams();
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const { reservationModal } = useSelector((state) => state.ui);
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -114,7 +176,7 @@ export default function VenueDetail() {
               onClick={() => dispatch(openReservationModal(venue))}
               className="btn-primary px-8 py-3 text-lg"
             >
-              Reserve Now
+              {t('detail.reserveNow')}
             </button>
           )}
         </div>
@@ -126,7 +188,7 @@ export default function VenueDetail() {
               <div className="flex justify-between text-sm mb-1">
                 <span className="text-gray-400">Busy level</span>
                 <span className={venue.busy_level > 70 ? 'text-red-400' : venue.busy_level > 40 ? 'text-yellow-400' : 'text-green-400'}>
-                  {venue.busy_level > 70 ? 'Very Busy' : venue.busy_level > 40 ? 'Moderate' : 'Quiet'}
+                  {venue.busy_level > 70 ? t('detail.veryBusy') : venue.busy_level > 40 ? t('detail.moderate') : t('detail.quiet')}
                 </span>
               </div>
               <div className="h-2 bg-dark-border rounded-full overflow-hidden">
@@ -145,6 +207,9 @@ export default function VenueDetail() {
           </div>
         )}
 
+        {/* Who's going tonight */}
+        {venue.is_open && <WhoIsGoing venue={venue} t={t} />}
+
         {/* Tabs */}
         <div className="flex border-b border-dark-border mb-6">
           {['about', 'stories', 'photos', 'reviews', 'hours'].map((tab) => (
@@ -155,7 +220,7 @@ export default function VenueDetail() {
                 activeTab === tab ? 'border-primary text-primary' : 'border-transparent text-gray-400 hover:text-white'
               }`}
             >
-              {tab}
+              {t(`detail.tab.${tab}`)}
             </button>
           ))}
         </div>
@@ -208,7 +273,7 @@ export default function VenueDetail() {
             ))}
 
             <form onSubmit={submitReview} className="card p-5 space-y-4">
-              <h3 className="font-semibold text-white">Leave a Review</h3>
+              <h3 className="font-semibold text-white">{t('detail.review.title')}</h3>
               <div className="flex space-x-2">
                 {[1, 2, 3, 4, 5].map((star) => (
                   <button key={star} type="button" onClick={() => setReview({ ...review, rating: star })}
@@ -220,13 +285,13 @@ export default function VenueDetail() {
               <textarea
                 value={review.comment}
                 onChange={(e) => setReview({ ...review, comment: e.target.value })}
-                placeholder="Share your experience..."
+                placeholder={t('detail.review.placeholder')}
                 rows={3}
                 className="input resize-none"
                 required
               />
               <button type="submit" disabled={submittingReview} className="btn-primary">
-                {submittingReview ? 'Submitting...' : 'Submit Review'}
+                {submittingReview ? t('detail.review.submitting') : t('detail.review.submit')}
               </button>
             </form>
           </div>
@@ -237,9 +302,9 @@ export default function VenueDetail() {
             <div className="space-y-3">
               {venue.opening_hours?.map((hours) => (
                 <div key={hours.id} className="flex justify-between items-center py-2 border-b border-dark-border last:border-0">
-                  <span className="text-white font-medium">{DAYS[hours.day]}</span>
+                  <span className="text-white font-medium">{t(`day.${hours.day}`)}</span>
                   <span className="text-gray-400">
-                    {hours.is_closed ? 'Closed' : `${hours.open_time} – ${hours.close_time}`}
+                    {hours.is_closed ? t('hours.closed') : `${hours.open_time} – ${hours.close_time}`}
                   </span>
                 </div>
               ))}

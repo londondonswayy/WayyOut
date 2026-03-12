@@ -5,20 +5,22 @@ import {
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser } from '../store/slices/authSlice';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export default function LoginScreen({ navigation }) {
   const dispatch = useDispatch();
   const { loading } = useSelector((state) => state.auth);
+  const { t } = useTranslation();
   const [form, setForm] = useState({ email: '', password: '' });
 
   const handleLogin = async () => {
     if (!form.email || !form.password) {
-      Alert.alert('Error', 'Please fill in all fields.');
+      Alert.alert('Error', t('login.missingFields'));
       return;
     }
     const result = await dispatch(loginUser(form));
     if (loginUser.rejected.match(result)) {
-      Alert.alert('Login Failed', 'Invalid email or password.');
+      Alert.alert(t('login.error'), t('login.errorMsg'));
     }
   };
 
@@ -32,38 +34,38 @@ export default function LoginScreen({ navigation }) {
         <View style={styles.logo}>
           <Text style={styles.logoW}>W</Text>
         </View>
-        <Text style={styles.title}>Way Out</Text>
-        <Text style={styles.subtitle}>Sign in to discover your night</Text>
+        <Text style={styles.title}>WayyOut</Text>
+        <Text style={styles.subtitle}>{t('login.subtitle')}</Text>
 
         {/* Form */}
         <View style={styles.form}>
-          <Text style={styles.label}>Email</Text>
+          <Text style={styles.label}>{t('login.email')}</Text>
           <TextInput
             style={styles.input}
             placeholder="you@example.com"
             placeholderTextColor="#6B7280"
             value={form.email}
-            onChangeText={(t) => setForm({ ...form, email: t })}
+            onChangeText={(v) => setForm({ ...form, email: v })}
             keyboardType="email-address"
             autoCapitalize="none"
           />
 
-          <Text style={styles.label}>Password</Text>
+          <Text style={styles.label}>{t('login.password')}</Text>
           <TextInput
             style={styles.input}
             placeholder="••••••••"
             placeholderTextColor="#6B7280"
             value={form.password}
-            onChangeText={(t) => setForm({ ...form, password: t })}
+            onChangeText={(v) => setForm({ ...form, password: v })}
             secureTextEntry
           />
 
           <TouchableOpacity style={styles.btn} onPress={handleLogin} disabled={loading}>
-            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>Sign In</Text>}
+            {loading ? <ActivityIndicator color="#fff" /> : <Text style={styles.btnText}>{t('login.submit')}</Text>}
           </TouchableOpacity>
 
           <TouchableOpacity onPress={() => navigation.navigate('Register')}>
-            <Text style={styles.linkText}>Don't have an account? <Text style={styles.link}>Sign up</Text></Text>
+            <Text style={styles.linkText}>{t('login.noAccount')} <Text style={styles.link}>{t('login.signUp')}</Text></Text>
           </TouchableOpacity>
         </View>
       </View>
@@ -72,10 +74,10 @@ export default function LoginScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#07071A' },
   content: { flex: 1, justifyContent: 'center', alignItems: 'center', paddingHorizontal: 24 },
   logo: {
-    width: 56, height: 56, backgroundColor: '#FF3D57', borderRadius: 16,
+    width: 56, height: 56, backgroundColor: '#7C3AED', borderRadius: 16,
     alignItems: 'center', justifyContent: 'center', marginBottom: 12,
   },
   logoW: { color: '#fff', fontSize: 24, fontWeight: '800' },
@@ -84,15 +86,15 @@ const styles = StyleSheet.create({
   form: { width: '100%' },
   label: { color: '#9CA3AF', fontSize: 12, marginBottom: 6, marginTop: 16 },
   input: {
-    backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E',
+    backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42',
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 14,
     color: '#fff', fontSize: 14,
   },
   btn: {
-    backgroundColor: '#FF3D57', borderRadius: 12, paddingVertical: 16,
+    backgroundColor: '#7C3AED', borderRadius: 12, paddingVertical: 16,
     alignItems: 'center', marginTop: 24, marginBottom: 16,
   },
   btnText: { color: '#fff', fontWeight: '700', fontSize: 16 },
   linkText: { color: '#6B7280', fontSize: 13, textAlign: 'center' },
-  link: { color: '#FF3D57', fontWeight: '600' },
+  link: { color: '#7C3AED', fontWeight: '600' },
 });

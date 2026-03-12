@@ -24,21 +24,21 @@ export default function TabNavigator() {
     <Tab.Navigator
       screenOptions={({ route }) => ({
         tabBarIcon: ({ focused }) => <TabIcon label={route.name} focused={focused} />,
-        tabBarActiveTintColor: '#FF3D57',
+        tabBarActiveTintColor: '#7C3AED',
         tabBarInactiveTintColor: '#6B7280',
         tabBarStyle: {
           backgroundColor: '#0D0D14',
-          borderTopColor: '#1E1E2E',
+          borderTopColor: '#1C1C42',
           paddingBottom: 8,
           height: 64,
         },
         tabBarLabelStyle: { fontSize: 10, fontWeight: '500' },
-        headerStyle: { backgroundColor: '#0A0A0F' },
+        headerStyle: { backgroundColor: '#07071A' },
         headerTintColor: '#fff',
         headerTitleStyle: { fontWeight: '700' },
       })}
     >
-      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Way Out' }} />
+      <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'WayyOut' }} />
       <Tab.Screen name="Discover" component={DiscoverScreen} />
       <Tab.Screen name="Reservations" component={ReservationsScreen} />
       <Tab.Screen name="Profile" component={ProfileScreen} />

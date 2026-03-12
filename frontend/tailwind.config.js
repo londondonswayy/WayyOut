@@ -4,19 +4,19 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#FF3D57',
-          dark: '#CC1F37',
-          light: '#FF7087',
+          DEFAULT: '#7C3AED',
+          dark: '#5B21B6',
+          light: '#A78BFA',
         },
         dark: {
-          DEFAULT: '#0A0A0F',
-          card: '#12121A',
-          border: '#1E1E2E',
+          DEFAULT: '#07071A',
+          card: '#0E0E28',
+          border: '#1C1C42',
         },
         accent: {
-          purple: '#7B2FBE',
-          gold: '#F4A229',
-          teal: '#00D4AA',
+          gold: '#F59E0B',
+          teal: '#14B8A6',
+          pink: '#EC4899',
         },
       },
       fontFamily: {
@@ -25,7 +25,7 @@ module.exports = {
       },
       backgroundImage: {
         'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'hero-gradient': 'linear-gradient(135deg, #0A0A0F 0%, #1A0A2E 50%, #0A1628 100%)',
+        'hero-gradient': 'linear-gradient(135deg, #07071A 0%, #12103A 50%, #07071A 100%)',
       },
       animation: {
         'pulse-slow': 'pulse 3s ease-in-out infinite',

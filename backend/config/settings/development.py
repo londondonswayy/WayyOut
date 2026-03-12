@@ -32,6 +32,7 @@ LOCAL_APPS = [
     'apps.ai_agent',
     'apps.payments',
     'apps.notifications',
+    'apps.ads',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -109,6 +110,20 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
+    # Rate limiting (higher limits in dev so you can test freely)
+    'DEFAULT_THROTTLE_CLASSES': [
+        'rest_framework.throttling.AnonRateThrottle',
+        'rest_framework.throttling.UserRateThrottle',
+        'rest_framework.throttling.ScopedRateThrottle',
+    ],
+    'DEFAULT_THROTTLE_RATES': {
+        'anon': '1000/hour',
+        'user': '10000/hour',
+        'login': '50/minute',
+        'register': '50/hour',
+        'reservation': '200/hour',
+        'review': '50/day',
+    },
 }
 
 SIMPLE_JWT = {

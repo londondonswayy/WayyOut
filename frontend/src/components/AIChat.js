@@ -3,16 +3,14 @@ import { useDispatch, useSelector } from 'react-redux';
 import { toggleAIChat } from '../store/slices/uiSlice';
 import { aiAPI } from '../services/api';
 import VenueCard from './VenueCard';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export default function AIChat() {
   const dispatch = useDispatch();
   const { aiChatOpen, userLocation } = useSelector((state) => state.ui);
+  const { t } = useTranslation();
   const [messages, setMessages] = useState([
-    {
-      role: 'assistant',
-      text: "Hey! I'm your Way Out guide. Tell me what you're looking for tonight — vibe, food, party, whatever — and I'll find the perfect spot for you.",
-      suggestions: [],
-    },
+    { role: 'assistant', text: null, suggestions: [] },
   ]);
   const [input, setInput] = useState('');
   const [loading, setLoading] = useState(false);
@@ -46,7 +44,7 @@ export default function AIChat() {
     } catch {
       setMessages((prev) => [
         ...prev,
-        { role: 'assistant', text: "Sorry, I couldn't find anything right now. Try again in a moment!", suggestions: [] },
+        { role: 'assistant', text: t('ai.error'), suggestions: [] },
       ]);
     } finally {
       setLoading(false);
@@ -71,8 +69,8 @@ export default function AIChat() {
         <div className="flex items-center space-x-2">
           <div className="w-8 h-8 bg-primary/20 rounded-lg flex items-center justify-center text-lg">✨</div>
           <div>
-            <p className="font-semibold text-sm text-white">AI Guide</p>
-            <p className="text-xs text-green-400">● Online now</p>
+            <p className="font-semibold text-sm text-white">{t('ai.title')}</p>
+            <p className="text-xs text-green-400">{t('ai.online')}</p>
           </div>
         </div>
         <button onClick={() => dispatch(toggleAIChat())} className="text-gray-500 hover:text-white transition-colors text-xl">
@@ -90,7 +88,7 @@ export default function AIChat() {
                   ? 'bg-primary text-white rounded-br-sm'
                   : 'bg-dark-border text-gray-200 rounded-bl-sm'
               }`}>
-                {msg.text}
+                {msg.text ?? t('ai.greeting')}
               </div>
 
               {msg.tips?.length > 0 && (
@@ -132,7 +130,7 @@ export default function AIChat() {
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="What are you looking for tonight?"
+            placeholder={t('ai.placeholder')}
             className="input flex-1 text-sm py-2"
             disabled={loading}
           />

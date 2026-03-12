@@ -10,6 +10,7 @@ from apps.venues.models import Venue
 class ReservationCreateView(generics.CreateAPIView):
     serializer_class = ReservationCreateSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = 'reservation'
 
     def create(self, request, *args, **kwargs):
         serializer = self.get_serializer(data=request.data)

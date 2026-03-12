@@ -19,6 +19,7 @@ urlpatterns = [
     path('api/ai/', include('apps.ai_agent.urls')),
     path('api/payments/', include('apps.payments.urls')),
     path('api/notifications/', include('apps.notifications.urls')),
+    path('api/ads/', include('apps.ads.urls')),
 ]
 
 if settings.DEBUG:

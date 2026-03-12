@@ -38,6 +38,7 @@ LOCAL_APPS = [
     'apps.ai_agent',
     'apps.payments',
     'apps.notifications',
+    'apps.ads',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -175,7 +176,7 @@ PLATFORM_COMMISSION_RATE = 0.08  # 8%
 
 # API Docs
 SPECTACULAR_SETTINGS = {
-    'TITLE': 'Way Out API',
+    'TITLE': 'WayyOut API',
     'DESCRIPTION': 'Location-based discovery and reservation platform API',
     'VERSION': '1.0.0',
 }

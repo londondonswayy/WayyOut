@@ -28,7 +28,7 @@ def get_ai_recommendations(query: str, city: str = None, lat: float = None, lng:
             'address': venue.address,
         })
 
-    system_prompt = """You are Way Out's AI guide — a neutral, helpful assistant that helps users discover
+    system_prompt = """You are WayyOut's AI guide — a neutral, helpful assistant that helps users discover
 the best nearby venues based on their mood, preferences, and real-time conditions.
 
 Rules:

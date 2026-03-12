@@ -1,9 +1,9 @@
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const BASE_URL = 'http://10.0.2.2:8000/api'; // Android emulator → localhost
-// For iOS simulator: use 'http://localhost:8000/api'
-// For physical device: use your machine's local IP
+// Production: your Render backend URL
+// Development: http://localhost:8000/api (iOS sim) or http://10.0.2.2:8000/api (Android)
+const BASE_URL = process.env.EXPO_PUBLIC_API_URL || 'https://wayyout-backend.onrender.com/api';
 
 const api = axios.create({
   baseURL: BASE_URL,
@@ -66,6 +66,10 @@ export const reservationAPI = {
 export const storyAPI = {
   feed: (params) => api.get('/stories/', { params }),
   view: (id) => api.post(`/stories/${id}/view/`),
+  create: (formData) => api.post('/stories/create/', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  }),
+  delete: (id) => api.delete(`/stories/${id}/`),
 };
 
 export const aiAPI = {
@@ -78,6 +82,19 @@ export const notificationAPI = {
   unreadCount: () => api.get('/notifications/unread/'),
   markRead: (id) => api.post(`/notifications/${id}/read/`),
   markAllRead: () => api.post('/notifications/mark-all-read/'),
+};
+
+export const adAPI = {
+  feed: () => api.get('/ads/feed/'),
+  impression: (id) => api.post(`/ads/campaigns/${id}/impression/`),
+  subscription: () => api.get('/ads/subscription/'),
+  subscribe: (plan) => api.post('/ads/subscription/', { plan }),
+  cancelSubscription: () => api.delete('/ads/subscription/'),
+  // Venue owner campaign management
+  campaigns: () => api.get('/ads/campaigns/'),
+  createCampaign: (data) => api.post('/ads/campaigns/', data),
+  updateCampaign: (id, data) => api.patch(`/ads/campaigns/${id}/`, data),
+  deleteCampaign: (id) => api.delete(`/ads/campaigns/${id}/`),
 };
 
 export default api;

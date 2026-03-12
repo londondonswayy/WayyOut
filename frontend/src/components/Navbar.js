@@ -4,6 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { logout } from '../store/slices/authSlice';
 import { toggleAIChat } from '../store/slices/uiSlice';
 import { notificationAPI } from '../services/api';
+import { useTranslation } from '../i18n/LanguageContext';
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -11,6 +12,7 @@ export default function Navbar() {
   const location = useLocation();
   const { isAuthenticated, user } = useSelector((state) => state.auth);
   const { aiChatOpen } = useSelector((state) => state.ui);
+  const { t, lang, switchLang } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
   const [unread, setUnread] = useState(0);
 
@@ -43,21 +45,31 @@ export default function Navbar() {
 
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-6">
-            <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>Home</Link>
-            <Link to="/discover" className={`text-sm font-medium transition-colors ${isActive('/discover') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>Discover</Link>
+            <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.home')}</Link>
+            <Link to="/discover" className={`text-sm font-medium transition-colors ${isActive('/discover') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.discover')}</Link>
             {isAuthenticated && user?.role === 'venue_owner' && (
-              <Link to="/venue-dashboard" className={`text-sm font-medium transition-colors ${isActive('/venue-dashboard') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>My Venues</Link>
+              <Link to="/venue-dashboard" className={`text-sm font-medium transition-colors ${isActive('/venue-dashboard') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.myVenues')}</Link>
             )}
           </div>
 
           {/* Right */}
           <div className="flex items-center space-x-3">
+            {/* Language toggle */}
+            <button
+              onClick={() => switchLang(lang === 'en' ? 'fr' : 'en')}
+              className="flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-dark-border hover:border-primary/50 text-gray-400 hover:text-white transition-all text-xs font-semibold"
+              title={lang === 'en' ? 'Passer en français' : 'Switch to English'}
+            >
+              <span>{lang === 'en' ? '🇫🇷' : '🇬🇧'}</span>
+              <span className="hidden sm:block">{lang === 'en' ? 'FR' : 'EN'}</span>
+            </button>
+
             {isAuthenticated ? (
               <>
                 {/* AI */}
                 <button onClick={() => dispatch(toggleAIChat())}
                   className={`hidden md:flex items-center space-x-2 px-3 py-2 rounded-xl text-sm transition-all ${aiChatOpen ? 'bg-accent-purple/30 border border-accent-purple text-purple-300' : 'bg-accent-purple/10 border border-accent-purple/30 text-purple-400 hover:bg-accent-purple/20'}`}>
-                  <span>✨</span><span>AI Guide</span>
+                  <span>✨</span><span>{t('nav.aiGuide')}</span>
                 </button>
 
                 {/* Notifications */}
@@ -72,8 +84,7 @@ export default function Navbar() {
 
                 {/* Avatar dropdown */}
                 <div className="relative">
-                  <button onClick={() => setMenuOpen(!menuOpen)}
-                    className="flex items-center space-x-2 group">
+                  <button onClick={() => setMenuOpen(!menuOpen)} className="flex items-center space-x-2 group">
                     <div className="w-9 h-9 bg-primary/20 border-2 border-primary/40 rounded-full flex items-center justify-center text-primary font-bold text-sm group-hover:border-primary transition-colors">
                       {user?.full_name?.[0]?.toUpperCase()}
                     </div>
@@ -88,14 +99,14 @@ export default function Navbar() {
                           {user?.role?.replace('_', ' ')}
                         </span>
                       </div>
-                      <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">Profile</Link>
-                      <Link to="/reservations" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">Reservations</Link>
+                      <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.profile')}</Link>
+                      <Link to="/reservations" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.reservations')}</Link>
                       {user?.role === 'venue_owner' && (
-                        <Link to="/venue-dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">My Venues</Link>
+                        <Link to="/venue-dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.myVenues')}</Link>
                       )}
                       <hr className="border-dark-border my-1" />
                       <button onClick={handleLogout} className="w-full text-left px-4 py-2 text-sm text-red-400 hover:text-red-300 hover:bg-dark-border transition-colors">
-                        Sign Out
+                        {t('nav.signOut')}
                       </button>
                     </div>
                   )}
@@ -103,8 +114,8 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">Sign In</Link>
-                <Link to="/register" className="btn-primary text-sm py-2 px-4">Get Started</Link>
+                <Link to="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">{t('nav.signIn')}</Link>
+                <Link to="/register" className="btn-primary text-sm py-2 px-4">{t('nav.getStarted')}</Link>
               </>
             )}
           </div>

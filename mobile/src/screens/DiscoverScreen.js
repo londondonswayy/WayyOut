@@ -5,12 +5,14 @@ import {
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchVenues } from '../store/slices/venueSlice';
 import VenueCard from '../components/VenueCard';
+import { useTranslation } from '../i18n/LanguageContext';
 
 const VIBES = ['casual', 'lively', 'romantic', 'upscale', 'party'];
 
 export default function DiscoverScreen({ navigation, route }) {
   const dispatch = useDispatch();
   const { list, loading } = useSelector((state) => state.venues);
+  const { t } = useTranslation();
   const [search, setSearch] = useState('');
   const [filters, setFilters] = useState({
     is_open: false,
@@ -39,7 +41,7 @@ export default function DiscoverScreen({ navigation, route }) {
       <View style={styles.searchContainer}>
         <TextInput
           style={styles.searchInput}
-          placeholder="Search venues, cities..."
+          placeholder={t('discover.placeholder')}
           placeholderTextColor="#6B7280"
           value={search}
           onChangeText={setSearch}
@@ -53,7 +55,7 @@ export default function DiscoverScreen({ navigation, route }) {
           style={[styles.filterChip, filters.is_open && styles.filterChipActive]}
           onPress={() => setFilters((prev) => ({ ...prev, is_open: !prev.is_open }))}
         >
-          <Text style={[styles.filterText, filters.is_open && styles.filterTextActive]}>● Open Now</Text>
+          <Text style={[styles.filterText, filters.is_open && styles.filterTextActive]}>{t('discover.openNow')}</Text>
         </TouchableOpacity>
         {VIBES.map((vibe) => (
           <TouchableOpacity
@@ -79,8 +81,8 @@ export default function DiscoverScreen({ navigation, route }) {
           !loading && (
             <View style={styles.empty}>
               <Text style={{ fontSize: 48 }}>🔍</Text>
-              <Text style={styles.emptyText}>No venues found</Text>
-              <Text style={styles.emptySubtext}>Try adjusting your filters</Text>
+              <Text style={styles.emptyText}>{t('discover.empty')}</Text>
+              <Text style={styles.emptySubtext}>{t('discover.emptyDesc')}</Text>
             </View>
           )
         }
@@ -91,21 +93,21 @@ export default function DiscoverScreen({ navigation, route }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0A0A0F' },
+  container: { flex: 1, backgroundColor: '#07071A' },
   searchContainer: { padding: 16 },
   searchInput: {
-    backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E',
+    backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42',
     borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12, color: '#fff', fontSize: 14,
   },
   filterScroll: { maxHeight: 48 },
   filterContent: { paddingHorizontal: 16, gap: 8 },
   filterChip: {
     paddingHorizontal: 14, paddingVertical: 8, borderRadius: 20,
-    backgroundColor: '#12121A', borderWidth: 1, borderColor: '#1E1E2E', marginRight: 8,
+    backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42', marginRight: 8,
   },
-  filterChipActive: { backgroundColor: 'rgba(255,61,87,0.15)', borderColor: '#FF3D57' },
+  filterChipActive: { backgroundColor: 'rgba(255,61,87,0.15)', borderColor: '#7C3AED' },
   filterText: { color: '#9CA3AF', fontSize: 12, fontWeight: '500' },
-  filterTextActive: { color: '#FF3D57' },
+  filterTextActive: { color: '#7C3AED' },
   empty: { alignItems: 'center', paddingTop: 80 },
   emptyText: { color: '#fff', fontSize: 18, fontWeight: '700', marginTop: 12 },
   emptySubtext: { color: '#6B7280', marginTop: 4 },

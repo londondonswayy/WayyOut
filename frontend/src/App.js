@@ -1,4 +1,5 @@
 import React, { useEffect } from 'react';
+import { LanguageProvider } from './i18n/LanguageContext';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchProfile } from './store/slices/authSlice';
@@ -47,6 +48,7 @@ export default function App() {
   }, [dispatch]);
 
   return (
+    <LanguageProvider>
     <div className="min-h-screen bg-dark">
       <Navbar />
       <Routes>
@@ -62,5 +64,6 @@ export default function App() {
       </Routes>
       {isAuthenticated && <AIChat />}
     </div>
+    </LanguageProvider>
   );
 }

@@ -4,11 +4,13 @@ import { useDispatch, useSelector } from 'react-redux';
 import { fetchVenues, fetchCategories, setFilters } from '../store/slices/venueSlice';
 import VenueCard from '../components/VenueCard';
 import ReservationModal from '../components/ReservationModal';
+import { useTranslation } from '../i18n/LanguageContext';
 
 const VIBES = ['casual', 'lively', 'romantic', 'upscale', 'party'];
 
 export default function Discover() {
   const dispatch = useDispatch();
+  const { t } = useTranslation();
   const [searchParams, setSearchParams] = useSearchParams();
   const { list, categories, loading, filters } = useSelector((state) => state.venues);
   const { reservationModal } = useSelector((state) => state.ui);
@@ -52,16 +54,16 @@ export default function Discover() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header & Search */}
         <div className="mb-8">
-          <h1 className="font-display font-bold text-3xl text-white mb-6">Discover Venues</h1>
+          <h1 className="font-display font-bold text-3xl text-white mb-6">{t('discover.title')}</h1>
           <form onSubmit={handleSearch} className="flex gap-3">
             <input
               type="text"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              placeholder="Search by name, city, or vibe..."
+              placeholder={t('discover.placeholder')}
               className="input flex-1"
             />
-            <button type="submit" className="btn-primary px-6">Search</button>
+            <button type="submit" className="btn-primary px-6">{t('discover.search')}</button>
           </form>
         </div>
 
@@ -71,7 +73,7 @@ export default function Discover() {
             {/* Open now */}
             <div className="card p-4">
               <label className="flex items-center justify-between cursor-pointer">
-                <span className="text-sm font-medium text-white">Open now only</span>
+                <span className="text-sm font-medium text-white">{t('discover.openNow')}</span>
                 <div
                   onClick={() => updateFilter('is_open', searchParams.get('is_open') === 'true' ? '' : 'true')}
                   className={`w-10 h-5 rounded-full transition-colors relative cursor-pointer ${
@@ -87,7 +89,7 @@ export default function Discover() {
 
             {/* Categories */}
             <div className="card p-4">
-              <h3 className="font-semibold text-sm text-white mb-3">Category</h3>
+              <h3 className="font-semibold text-sm text-white mb-3">{t('discover.category')}</h3>
               <div className="space-y-2">
                 <button
                   onClick={() => updateFilter('category', '')}
@@ -95,7 +97,7 @@ export default function Discover() {
                     !searchParams.get('category') ? 'bg-primary/20 text-primary' : 'text-gray-400 hover:text-white'
                   }`}
                 >
-                  All
+                  {t('discover.all')}
                 </button>
                 {categories.map((cat) => (
                   <button
@@ -114,7 +116,7 @@ export default function Discover() {
 
             {/* Vibes */}
             <div className="card p-4">
-              <h3 className="font-semibold text-sm text-white mb-3">Vibe</h3>
+              <h3 className="font-semibold text-sm text-white mb-3">{t('discover.vibe')}</h3>
               <div className="flex flex-wrap gap-2">
                 {VIBES.map((vibe) => (
                   <button
@@ -134,15 +136,15 @@ export default function Discover() {
 
             {/* Sort */}
             <div className="card p-4">
-              <h3 className="font-semibold text-sm text-white mb-3">Sort by</h3>
+              <h3 className="font-semibold text-sm text-white mb-3">{t('discover.sortBy')}</h3>
               <select
                 value={searchParams.get('ordering') || '-rating'}
                 onChange={(e) => updateFilter('ordering', e.target.value)}
                 className="input text-sm"
               >
-                <option value="-rating">Top Rated</option>
-                <option value="-busy_level">Busiest Now</option>
-                <option value="-created_at">Newest</option>
+                <option value="-rating">{t('discover.topRated')}</option>
+                <option value="-busy_level">{t('discover.busiest')}</option>
+                <option value="-created_at">{t('discover.newest')}</option>
               </select>
             </div>
           </aside>
@@ -150,7 +152,7 @@ export default function Discover() {
           {/* Results */}
           <main className="flex-1">
             <div className="flex items-center justify-between mb-4">
-              <p className="text-gray-400 text-sm">{list.length} venues found</p>
+              <p className="text-gray-400 text-sm">{list.length} {t('discover.count')}</p>
             </div>
 
             {loading ? (
@@ -175,8 +177,8 @@ export default function Discover() {
             ) : (
               <div className="text-center py-20 card">
                 <p className="text-5xl mb-4">🔍</p>
-                <p className="text-white text-xl font-semibold mb-2">No venues found</p>
-                <p className="text-gray-500">Try adjusting your filters or search in a different city.</p>
+                <p className="text-white text-xl font-semibold mb-2">{t('discover.empty')}</p>
+                <p className="text-gray-500">{t('discover.emptyDesc')}</p>
               </div>
             )}
           </main>

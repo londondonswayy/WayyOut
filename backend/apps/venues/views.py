@@ -151,11 +151,25 @@ def update_busy_level(request, slug):
 class VenueReviewCreateView(generics.CreateAPIView):
     serializer_class = VenueReviewSerializer
     permission_classes = [permissions.IsAuthenticated]
+    throttle_scope = 'review'
 
     def perform_create(self, serializer):
+        from rest_framework.exceptions import ValidationError as DRFValidationError
+        import re
+
         venue = Venue.objects.get(slug=self.kwargs['slug'])
-        review = serializer.save(user=self.request.user, venue=venue)
-        # Recalculate venue rating
+
+        # One review per user per venue
+        if VenueReview.objects.filter(user=self.request.user, venue=venue).exists():
+            raise DRFValidationError('You have already submitted a review for this venue.')
+
+        # Sanitize comment
+        comment = serializer.validated_data.get('comment', '')
+        comment = re.sub(r'<[^>]+>', '', comment).strip()
+        if len(comment) < 5:
+            raise DRFValidationError('Review must be at least 5 characters long.')
+
+        review = serializer.save(user=self.request.user, venue=venue, comment=comment)
         reviews = venue.reviews.all()
         venue.rating = sum(r.rating for r in reviews) / len(reviews)
         venue.review_count = len(reviews)
