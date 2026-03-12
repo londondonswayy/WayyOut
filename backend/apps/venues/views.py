@@ -209,5 +209,4 @@ class TrendingVenuesView(generics.ListAPIView):
     def get_queryset(self):
         return Venue.objects.filter(
             status=Venue.STATUS_APPROVED,
-            is_open=True
         ).order_by('-busy_level', '-rating')[:10]
