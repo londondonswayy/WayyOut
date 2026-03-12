@@ -1,10 +1,37 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, ScrollView, Image, TouchableOpacity,
+  View, Text, ScrollView, FlatList, Image, TouchableOpacity,
   StyleSheet, Modal, TextInput, Alert, Platform
 } from 'react-native';
 import { venueAPI, reservationAPI } from '../services/api';
 import { useTranslation } from '../i18n/LanguageContext';
+
+// Next 14 days as selectable chips
+function buildDateChips() {
+  const chips = [];
+  for (let i = 0; i < 14; i++) {
+    const d = new Date();
+    d.setDate(d.getDate() + i);
+    const value = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    chips.push({
+      value,
+      top: i === 0 ? 'Today' : i === 1 ? 'Tmrw' : d.toLocaleDateString('en-US', { weekday: 'short' }),
+      bottom: `${d.toLocaleDateString('en-US', { month: 'short' })} ${d.getDate()}`,
+    });
+  }
+  return chips;
+}
+const DATE_CHIPS = buildDateChips();
+
+// Half-hour slots 11:00 → 02:00
+const TIME_SLOTS = [];
+for (let h = 11; h < 27; h++) {
+  const hour = String(h % 24).padStart(2, '0');
+  TIME_SLOTS.push(`${hour}:00`);
+  TIME_SLOTS.push(`${hour}:30`);
+}
+
+const PARTY_SIZES = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12, 15, 20];
 
 export default function VenueDetailScreen({ route }) {
   const { slug } = route.params;
@@ -14,7 +41,7 @@ export default function VenueDetailScreen({ route }) {
   const [reserveModal, setReserveModal] = useState(false);
   const [reserveForm, setReserveForm] = useState({
     reservation_type: 'table',
-    date: new Date().toISOString().split('T')[0],
+    date: DATE_CHIPS[0].value,
     time: '20:00',
     party_size: 2,
     special_requests: '',
@@ -157,31 +184,68 @@ export default function VenueDetailScreen({ route }) {
               ))}
             </View>
 
+            {/* Date chips */}
             <Text style={styles.fieldLabel}>{t('res.date')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={reserveForm.date}
-              onChangeText={(v) => setReserveForm({ ...reserveForm, date: v })}
-              placeholder="YYYY-MM-DD"
-              placeholderTextColor="#6B7280"
+            <FlatList
+              horizontal
+              data={DATE_CHIPS}
+              keyExtractor={(item) => item.value}
+              showsHorizontalScrollIndicator={false}
+              style={{ marginBottom: 4 }}
+              renderItem={({ item }) => {
+                const active = reserveForm.date === item.value;
+                return (
+                  <TouchableOpacity
+                    onPress={() => setReserveForm({ ...reserveForm, date: item.value })}
+                    style={[pickerStyles.chip, active && pickerStyles.chipActive]}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[pickerStyles.chipTop, active && pickerStyles.chipTextActive]}>{item.top}</Text>
+                    <Text style={[pickerStyles.chipBottom, active && pickerStyles.chipTextActive]}>{item.bottom}</Text>
+                  </TouchableOpacity>
+                );
+              }}
             />
 
+            {/* Time slots */}
             <Text style={styles.fieldLabel}>{t('res.time')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={reserveForm.time}
-              onChangeText={(v) => setReserveForm({ ...reserveForm, time: v })}
-              placeholder="HH:MM"
-              placeholderTextColor="#6B7280"
+            <FlatList
+              horizontal
+              data={TIME_SLOTS}
+              keyExtractor={(item) => item}
+              showsHorizontalScrollIndicator={false}
+              style={{ marginBottom: 4 }}
+              renderItem={({ item }) => {
+                const active = reserveForm.time === item;
+                return (
+                  <TouchableOpacity
+                    onPress={() => setReserveForm({ ...reserveForm, time: item })}
+                    style={[pickerStyles.timeChip, active && pickerStyles.chipActive]}
+                    activeOpacity={0.8}
+                  >
+                    <Text style={[pickerStyles.timeChipText, active && pickerStyles.chipTextActive]}>{item}</Text>
+                  </TouchableOpacity>
+                );
+              }}
             />
 
+            {/* Party size stepper */}
             <Text style={styles.fieldLabel}>{t('res.partySize')}</Text>
-            <TextInput
-              style={styles.modalInput}
-              value={String(reserveForm.party_size)}
-              onChangeText={(v) => setReserveForm({ ...reserveForm, party_size: parseInt(v) || 1 })}
-              keyboardType="number-pad"
-            />
+            <View style={pickerStyles.stepper}>
+              <TouchableOpacity
+                onPress={() => setReserveForm({ ...reserveForm, party_size: Math.max(1, reserveForm.party_size - 1) })}
+                style={pickerStyles.stepBtn}
+              >
+                <Text style={pickerStyles.stepBtnText}>−</Text>
+              </TouchableOpacity>
+              <Text style={pickerStyles.stepValue}>{reserveForm.party_size}</Text>
+              <TouchableOpacity
+                onPress={() => setReserveForm({ ...reserveForm, party_size: Math.min(20, reserveForm.party_size + 1) })}
+                style={pickerStyles.stepBtn}
+              >
+                <Text style={pickerStyles.stepBtnText}>+</Text>
+              </TouchableOpacity>
+            </View>
 
             <Text style={styles.fieldLabel}>{t('res.special')}</Text>
             <TextInput
@@ -204,6 +268,35 @@ export default function VenueDetailScreen({ route }) {
     </View>
   );
 }
+
+const pickerStyles = StyleSheet.create({
+  chip: {
+    alignItems: 'center', justifyContent: 'center',
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderRadius: 12, backgroundColor: '#0E0E28',
+    borderWidth: 1, borderColor: '#1C1C42',
+    marginRight: 8, minWidth: 56,
+  },
+  chipActive: { backgroundColor: 'rgba(124,58,237,0.15)', borderColor: '#7C3AED' },
+  chipTop: { color: '#9CA3AF', fontSize: 11, fontWeight: '600', textAlign: 'center' },
+  chipBottom: { color: '#6B7280', fontSize: 10, textAlign: 'center', marginTop: 2 },
+  chipTextActive: { color: '#A78BFA' },
+  timeChip: {
+    paddingHorizontal: 14, paddingVertical: 10,
+    borderRadius: 12, backgroundColor: '#0E0E28',
+    borderWidth: 1, borderColor: '#1C1C42',
+    marginRight: 8,
+  },
+  timeChipText: { color: '#9CA3AF', fontSize: 13, fontWeight: '500' },
+  stepper: {
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42',
+    borderRadius: 12, overflow: 'hidden', alignSelf: 'flex-start',
+  },
+  stepBtn: { paddingHorizontal: 20, paddingVertical: 12 },
+  stepBtnText: { color: '#A78BFA', fontSize: 22, fontWeight: '300', lineHeight: 26 },
+  stepValue: { color: '#fff', fontSize: 16, fontWeight: '600', minWidth: 40, textAlign: 'center' },
+});
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#07071A' },

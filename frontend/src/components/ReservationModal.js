@@ -5,6 +5,20 @@ import { createReservation } from '../store/slices/reservationSlice';
 import { toast } from 'react-toastify';
 import { useTranslation } from '../i18n/LanguageContext';
 
+// Local today (avoids UTC-shift bug with toISOString)
+function localToday() {
+  const d = new Date();
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+}
+
+// Half-hour slots 11:00 → 02:00 (next day)
+const TIME_SLOTS = [];
+for (let h = 11; h < 27; h++) {
+  const hour = String(h % 24).padStart(2, '0');
+  TIME_SLOTS.push(`${hour}:00`);
+  TIME_SLOTS.push(`${hour}:30`);
+}
+
 export default function ReservationModal() {
   const dispatch = useDispatch();
   const { reservationModal } = useSelector((state) => state.ui);
@@ -16,7 +30,7 @@ export default function ReservationModal() {
   const [form, setForm] = useState({
     reservation_type: 'table',
     date: '',
-    time: '',
+    time: '20:00',
     party_size: 2,
     special_requests: '',
   });
@@ -99,21 +113,25 @@ export default function ReservationModal() {
               <input
                 type="date"
                 required
-                min={new Date().toISOString().split('T')[0]}
+                min={localToday()}
+                max={(() => { const d = new Date(); d.setDate(d.getDate() + 90); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })()}
                 value={form.date}
                 onChange={(e) => setForm({ ...form, date: e.target.value })}
-                className="input text-sm"
+                className="input text-sm [color-scheme:dark]"
               />
             </div>
             <div>
               <label className="text-xs text-gray-400 mb-1 block">{t('res.time')}</label>
-              <input
-                type="time"
+              <select
                 required
                 value={form.time}
                 onChange={(e) => setForm({ ...form, time: e.target.value })}
                 className="input text-sm"
-              />
+              >
+                {TIME_SLOTS.map((slot) => (
+                  <option key={slot} value={slot}>{slot}</option>
+                ))}
+              </select>
             </div>
           </div>
 
