@@ -115,14 +115,7 @@ export default function Register() {
       style={{ background: 'linear-gradient(135deg, #07071A 0%, #12103A 50%, #07071A 100%)' }}>
       <div className="w-full max-w-lg">
 
-        {/* Logo */}
         <div className="text-center mb-8">
-          <Link to="/" className="inline-flex items-center space-x-2 mb-6">
-            <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center">
-              <span className="text-white font-bold text-lg">W</span>
-            </div>
-            <span className="font-display font-bold text-2xl text-white">WayyOut</span>
-          </Link>
           <h1 className="font-display font-bold text-3xl text-white">{t('register.title')}</h1>
           <p className="text-gray-500 mt-1">{t('register.subtitle')}</p>
         </div>
