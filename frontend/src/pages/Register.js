@@ -115,7 +115,7 @@ export default function Register() {
       style={{ background: 'linear-gradient(135deg, #07071A 0%, #12103A 50%, #07071A 100%)' }}>
       <div className="w-full max-w-lg">
 
-        <div className="text-center mb-8">
+        <div className="text-center mb-8 mt-10">
           <h1 className="font-display font-bold text-3xl text-white">{t('register.title')}</h1>
           <p className="text-gray-500 mt-1">{t('register.subtitle')}</p>
         </div>
