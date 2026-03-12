@@ -8,6 +8,8 @@ import VenueCard from '../components/VenueCard';
 import { useTranslation } from '../i18n/LanguageContext';
 
 const VIBES = ['casual', 'lively', 'romantic', 'upscale', 'party'];
+// To expand to more cities later, just add to this array
+const CITIES = ['Montreal', 'Toronto'];
 
 export default function DiscoverScreen({ navigation, route }) {
   const dispatch = useDispatch();
@@ -17,6 +19,7 @@ export default function DiscoverScreen({ navigation, route }) {
   const [filters, setFilters] = useState({
     is_open: false,
     vibe: '',
+    city: route.params?.city || '',
     category: route.params?.category || '',
   });
 
@@ -25,6 +28,7 @@ export default function DiscoverScreen({ navigation, route }) {
     if (search) params.search = search;
     if (params.is_open) params.is_open = 'true';
     else delete params.is_open;
+    if (!params.city) delete params.city;
     dispatch(fetchVenues(params));
   }, [filters, search]);
 
@@ -51,6 +55,15 @@ export default function DiscoverScreen({ navigation, route }) {
 
       {/* Filters */}
       <ScrollView horizontal showsHorizontalScrollIndicator={false} style={styles.filterScroll} contentContainerStyle={styles.filterContent}>
+        {CITIES.map((c) => (
+          <TouchableOpacity
+            key={c}
+            style={[styles.filterChip, filters.city === c && styles.filterChipActive]}
+            onPress={() => toggleFilter('city', c)}
+          >
+            <Text style={[styles.filterText, filters.city === c && styles.filterTextActive]}>📍 {c}</Text>
+          </TouchableOpacity>
+        ))}
         <TouchableOpacity
           style={[styles.filterChip, filters.is_open && styles.filterChipActive]}
           onPress={() => setFilters((prev) => ({ ...prev, is_open: !prev.is_open }))}

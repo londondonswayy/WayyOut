@@ -10,6 +10,9 @@ import ReservationModal from '../components/ReservationModal';
 import { useTranslation } from '../i18n/LanguageContext';
 import { adAPI } from '../services/api';
 
+// To expand to more cities later, just add to this array
+const CITIES = ['Montreal', 'Toronto'];
+
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -17,7 +20,7 @@ export default function Home() {
   const { trending, categories } = useSelector((state) => state.venues);
   const { reservationModal } = useSelector((state) => state.ui);
   const { isAuthenticated } = useSelector((state) => state.auth);
-  const [city, setCity] = useState('');
+  const [city] = useState('');
   const [feedAd, setFeedAd] = useState(null);
   const [dismissedAd, setDismissedAd] = useState(false);
 
@@ -56,36 +59,22 @@ export default function Home() {
             {t('home.hero.desc')}
           </p>
 
-          {/* Search */}
-          <div className="flex flex-col sm:flex-row gap-3 max-w-xl mx-auto mb-8">
-            <input
-              type="text"
-              placeholder={t('home.search.placeholder')}
-              value={city}
-              onChange={(e) => setCity(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && navigate(`/discover${city ? `?city=${encodeURIComponent(city)}` : ''}`)}
-              className="input flex-1"
-            />
-            <Link
-              to={`/discover${city ? `?city=${encodeURIComponent(city)}` : ''}`}
-              className="btn-primary whitespace-nowrap"
-            >
-              {t('home.search.cta')}
-            </Link>
-          </div>
-
-          <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-gray-600 text-xs">{t('home.search.quick')}</span>
-            {['Montreal', 'Toronto'].map((c) => (
-              <button key={c} onClick={() => navigate(`/discover?city=${c}`)}
-                className="text-xs px-3 py-1.5 rounded-full border border-primary/30 text-primary hover:bg-primary/10 transition-colors">
+          {/* City picker */}
+          <p className="text-gray-500 text-sm mb-5">{t('home.search.chooseCity')}</p>
+          <div className="flex gap-4 justify-center mb-8">
+            {CITIES.map((c) => (
+              <Link
+                key={c}
+                to={`/discover?city=${c}`}
+                className="flex items-center gap-2 px-8 py-4 rounded-2xl border border-primary/30 bg-primary/5 hover:bg-primary/15 hover:border-primary transition-all text-white font-semibold text-lg hover:-translate-y-0.5"
+              >
                 📍 {c}
-              </button>
+              </Link>
             ))}
           </div>
 
           <p className="text-gray-600 text-sm mb-14">
-            ou{' '}
+            {t('home.search.or')}{' '}
             <button onClick={() => dispatch(toggleAIChat())} className="text-primary hover:underline">
               {t('home.search.askAI')}
             </button>

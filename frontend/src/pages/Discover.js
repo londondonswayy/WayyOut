@@ -7,6 +7,8 @@ import ReservationModal from '../components/ReservationModal';
 import { useTranslation } from '../i18n/LanguageContext';
 
 const VIBES = ['casual', 'lively', 'romantic', 'upscale', 'party'];
+// To expand to more cities later, just add to this array
+const CITIES = ['Montreal', 'Toronto'];
 
 export default function Discover() {
   const dispatch = useDispatch();
@@ -70,6 +72,26 @@ export default function Discover() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
+            {/* City */}
+            <div className="card p-4">
+              <h3 className="text-sm font-medium text-white mb-3">📍 {t('discover.city')}</h3>
+              <div className="space-y-2">
+                {CITIES.map((c) => (
+                  <button
+                    key={c}
+                    onClick={() => updateFilter('city', searchParams.get('city') === c ? '' : c)}
+                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
+                      searchParams.get('city') === c
+                        ? 'bg-primary/20 text-primary font-medium'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                  >
+                    {c}
+                  </button>
+                ))}
+              </div>
+            </div>
+
             {/* Open now */}
             <div className="card p-4">
               <label className="flex items-center justify-between cursor-pointer">

@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback, useRef } from 'react';
 import {
   View, Text, ScrollView, TouchableOpacity, FlatList,
-  RefreshControl, TextInput, StyleSheet, Dimensions, Animated,
+  RefreshControl, StyleSheet, Dimensions, Animated,
 } from 'react-native';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchTrending } from '../store/slices/venueSlice';
@@ -13,6 +13,8 @@ import { useTranslation } from '../i18n/LanguageContext';
 
 const { width } = Dimensions.get('window');
 
+// To expand to more cities later, just add to this array
+const CITIES = ['Montreal', 'Toronto'];
 const TICKER_COUNT = 8;
 
 function LiveTicker() {
@@ -54,7 +56,6 @@ export default function HomeScreen({ navigation }) {
   const [categories, setCategories] = useState([]);
   const [stories, setStories] = useState([]);
   const [refreshing, setRefreshing] = useState(false);
-  const [aiQuery, setAiQuery] = useState('');
   const [feedAd, setFeedAd] = useState(null);
   const [dismissedAd, setDismissedAd] = useState(false);
 
@@ -92,24 +93,21 @@ export default function HomeScreen({ navigation }) {
     >
       <LiveTicker />
 
-      {/* Hero / AI search */}
+      {/* Hero / City picker */}
       <View style={styles.hero}>
         <Text style={styles.heroTitle}>{t('home.heroTitle')}</Text>
         <Text style={styles.heroHighlight}>{t('home.heroHighlight')}</Text>
-        <View style={styles.searchRow}>
-          <TextInput
-            style={styles.searchInput}
-            placeholder={t('home.searchPlaceholder')}
-            placeholderTextColor="#6B7280"
-            value={aiQuery}
-            onChangeText={setAiQuery}
-          />
-          <TouchableOpacity
-            style={styles.searchBtn}
-            onPress={() => navigation.navigate('Discover', { aiQuery })}
-          >
-            <Text style={styles.searchBtnText}>→</Text>
-          </TouchableOpacity>
+        <Text style={styles.chooseCity}>{t('home.search.chooseCity')}</Text>
+        <View style={styles.cityRow}>
+          {CITIES.map((c) => (
+            <TouchableOpacity
+              key={c}
+              style={styles.cityBtn}
+              onPress={() => navigation.navigate('Discover', { city: c })}
+            >
+              <Text style={styles.cityBtnText}>📍 {c}</Text>
+            </TouchableOpacity>
+          ))}
         </View>
       </View>
 
@@ -216,15 +214,16 @@ const styles = StyleSheet.create({
     borderBottomColor: '#1C1C42',
   },
   heroTitle: { fontSize: 28, fontWeight: '700', color: '#fff' },
-  heroHighlight: { fontSize: 28, fontWeight: '700', color: '#7C3AED', marginBottom: 16 },
-  searchRow: { flexDirection: 'row', gap: 8 },
-  searchInput: {
-    flex: 1, backgroundColor: '#0E0E28', borderWidth: 1, borderColor: '#1C1C42',
-    borderRadius: 12, paddingHorizontal: 14, paddingVertical: 12,
-    color: '#fff', fontSize: 14,
+  heroHighlight: { fontSize: 28, fontWeight: '700', color: '#7C3AED', marginBottom: 12 },
+  chooseCity: { color: '#6B7280', fontSize: 13, marginBottom: 10 },
+  cityRow: { flexDirection: 'row', gap: 12 },
+  cityBtn: {
+    flex: 1, paddingVertical: 14, borderRadius: 16,
+    borderWidth: 1, borderColor: 'rgba(124,58,237,0.4)',
+    backgroundColor: 'rgba(124,58,237,0.08)',
+    alignItems: 'center',
   },
-  searchBtn: { backgroundColor: '#7C3AED', borderRadius: 12, paddingHorizontal: 16, justifyContent: 'center' },
-  searchBtnText: { color: '#fff', fontSize: 18, fontWeight: '700' },
+  cityBtnText: { color: '#fff', fontSize: 15, fontWeight: '600' },
   section: { paddingTop: 24 },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 16, marginBottom: 12 },
   sectionTitle: { fontSize: 18, fontWeight: '700', color: '#fff', paddingHorizontal: 16, marginBottom: 12 },
