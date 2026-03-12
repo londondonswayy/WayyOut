@@ -13,6 +13,15 @@ import { adAPI } from '../services/api';
 // To expand to more cities later, just add to this array
 const CITIES = ['Montreal', 'Toronto'];
 
+const DEFAULT_CATEGORIES = [
+  { id: 'restaurant', slug: 'restaurant', icon: '🍽️', name: 'Restaurants' },
+  { id: 'nightclub',  slug: 'nightclub',  icon: '🎉', name: 'Nightlife'   },
+  { id: 'lounge',     slug: 'lounge',     icon: '🛋️', name: 'Lounges'    },
+  { id: 'live-music', slug: 'live-music', icon: '🎵', name: 'Live Music'  },
+  { id: 'events',     slug: 'events',     icon: '🎟️', name: 'Events'     },
+  { id: 'rooftop',    slug: 'rooftop',    icon: '🏙️', name: 'Rooftop'    },
+];
+
 export default function Home() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -125,7 +134,7 @@ export default function Home() {
       <section className="py-8 px-4 max-w-7xl mx-auto">
         <h2 className="font-display font-bold text-2xl text-white mb-6">{t('home.categories.title')}</h2>
         <div className="flex flex-wrap gap-3">
-          {categories.map((cat) => (
+          {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map((cat) => (
             <Link key={cat.id} to={`/discover?category=${cat.slug}`}
               className="flex items-center space-x-2 px-5 py-3 card hover:border-primary/50 transition-all hover:-translate-y-0.5 font-medium">
               <span className="text-xl">{cat.icon}</span>
