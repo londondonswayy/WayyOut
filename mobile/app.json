@@ -58,9 +58,9 @@
     ],
     "extra": {
       "eas": {
-        "projectId": "YOUR_EAS_PROJECT_ID"
+        "projectId": "f4e52c32-8eda-4bff-9c59-dac2b3199dc4"
       }
     },
-    "owner": "YOUR_EXPO_USERNAME"
+    "owner": "londonswayy"
   }
 }
