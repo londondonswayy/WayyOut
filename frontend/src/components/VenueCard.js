@@ -144,7 +144,12 @@ export default function VenueCard({ venue }) {
               <span>★</span>
               <span className="text-sm font-semibold">{Number(venue.rating).toFixed(1)}</span>
             </div>
-            <span className="text-xs text-gray-600">{venue.review_count} reviews</span>
+            {venue.price_level && (
+              <span className="text-xs text-green-400 font-medium">
+                {'$'.repeat(venue.price_level)}
+                <span className="text-gray-700">{'$'.repeat(4 - venue.price_level)}</span>
+              </span>
+            )}
           </div>
         </div>
 

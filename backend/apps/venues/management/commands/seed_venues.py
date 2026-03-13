@@ -16,7 +16,7 @@ VENUES = [
         'category': 'nightclub',
         'description': 'One of Montreal\'s premier electronic music clubs, known for world-class DJs and an immersive light show across two floors.',
         'vibe': 'party', 'busy_level': 88, 'rating': 4.7, 'review_count': 312, 'capacity': 600,
-        'phone': '+1 514-555-0101', 'is_open': True, 'is_featured': True,
+        'phone': '+1 514-555-0101', 'is_open': True, 'is_featured': True, 'price_level': 2,
     },
     {
         'name': 'Apt 200',
@@ -27,7 +27,7 @@ VENUES = [
         'category': 'nightclub',
         'description': 'Underground nightclub in the Plateau with a focus on techno and house music. Intimate atmosphere and legendary late-night energy.',
         'vibe': 'lively', 'busy_level': 75, 'rating': 4.5, 'review_count': 198, 'capacity': 300,
-        'phone': '+1 514-555-0102', 'is_open': True, 'is_featured': False,
+        'phone': '+1 514-555-0102', 'is_open': True, 'is_featured': False, 'price_level': 2,
     },
     {
         'name': 'Terrasse Nuit',
@@ -38,7 +38,7 @@ VENUES = [
         'category': 'rooftop',
         'description': 'Stunning rooftop bar with panoramic views of downtown Montreal. Craft cocktails, DJs on weekends, and the best skyline in the city.',
         'vibe': 'upscale', 'busy_level': 70, 'rating': 4.8, 'review_count': 421, 'capacity': 200,
-        'phone': '+1 514-555-0103', 'is_open': True, 'is_featured': True,
+        'phone': '+1 514-555-0103', 'is_open': True, 'is_featured': True, 'price_level': 3,
     },
     {
         'name': 'Le Lab Comptoir à Cocktails',
@@ -49,7 +49,7 @@ VENUES = [
         'category': 'lounge',
         'description': 'Award-winning craft cocktail bar in the Plateau. Mixologists push boundaries with seasonal ingredients and molecular techniques.',
         'vibe': 'casual', 'busy_level': 60, 'rating': 4.9, 'review_count': 534, 'capacity': 80,
-        'phone': '+1 514-555-0104', 'is_open': True, 'is_featured': True,
+        'phone': '+1 514-555-0104', 'is_open': True, 'is_featured': True, 'price_level': 2,
     },
     {
         'name': 'Pullman',
@@ -60,7 +60,7 @@ VENUES = [
         'category': 'lounge',
         'description': 'Sophisticated wine bar and lounge with an extensive list of natural wines, charcuterie, and a warm, intimate atmosphere.',
         'vibe': 'romantic', 'busy_level': 55, 'rating': 4.6, 'review_count': 287, 'capacity': 100,
-        'phone': '+1 514-555-0105', 'is_open': True, 'is_featured': False,
+        'phone': '+1 514-555-0105', 'is_open': True, 'is_featured': False, 'price_level': 3,
     },
     {
         'name': 'Foufounes Électriques',
@@ -71,7 +71,7 @@ VENUES = [
         'category': 'live-music',
         'description': 'Iconic Montreal live music venue running since 1983. From punk to indie to metal — if it\'s loud and raw, Foufs has it.',
         'vibe': 'lively', 'busy_level': 80, 'rating': 4.4, 'review_count': 672, 'capacity': 400,
-        'phone': '+1 514-555-0106', 'is_open': False, 'is_featured': False,
+        'phone': '+1 514-555-0106', 'is_open': False, 'is_featured': False, 'price_level': 1,
     },
     {
         'name': 'Buonanotte',
@@ -82,7 +82,7 @@ VENUES = [
         'category': 'restaurant',
         'description': 'Chic Italian restaurant on the Main that transforms into a lively late-night spot. Known for its beautiful crowd and excellent pasta.',
         'vibe': 'upscale', 'busy_level': 65, 'rating': 4.5, 'review_count': 389, 'capacity': 150,
-        'phone': '+1 514-555-0107', 'is_open': True, 'is_featured': False,
+        'phone': '+1 514-555-0107', 'is_open': True, 'is_featured': False, 'price_level': 3,
     },
     {
         'name': 'Piknic Électronik',
@@ -93,7 +93,7 @@ VENUES = [
         'category': 'events',
         'description': 'Legendary outdoor electronic music event on Île Sainte-Hélène every Sunday in summer. Dancing under the sun with top local and international DJs.',
         'vibe': 'party', 'busy_level': 92, 'rating': 4.9, 'review_count': 1204, 'capacity': 2000,
-        'phone': '+1 514-555-0108', 'is_open': False, 'is_featured': True,
+        'phone': '+1 514-555-0108', 'is_open': False, 'is_featured': True, 'price_level': 1,
     },
 
     # ── TORONTO ───────────────────────────────────────────────────────────
@@ -106,7 +106,7 @@ VENUES = [
         'category': 'nightclub',
         'description': 'Toronto\'s largest nightclub and live event venue on the waterfront. Hosts the biggest international DJs and artists with a massive main floor.',
         'vibe': 'party', 'busy_level': 90, 'rating': 4.6, 'review_count': 892, 'capacity': 2500,
-        'phone': '+1 416-555-0201', 'is_open': True, 'is_featured': True,
+        'phone': '+1 416-555-0201', 'is_open': True, 'is_featured': True, 'price_level': 2,
     },
     {
         'name': 'Coda',
@@ -117,7 +117,7 @@ VENUES = [
         'category': 'nightclub',
         'description': 'Underground techno and house club in the Annex. Renowned sound system, no-frills vibe, and a crowd that\'s there purely for the music.',
         'vibe': 'lively', 'busy_level': 78, 'rating': 4.7, 'review_count': 445, 'capacity': 350,
-        'phone': '+1 416-555-0202', 'is_open': True, 'is_featured': False,
+        'phone': '+1 416-555-0202', 'is_open': True, 'is_featured': False, 'price_level': 2,
     },
     {
         'name': 'Lavelle',
@@ -128,7 +128,7 @@ VENUES = [
         'category': 'rooftop',
         'description': 'Toronto\'s most coveted rooftop pool bar on King West. Stunning CN Tower views, a heated pool, cabanas, and world-class DJs every weekend.',
         'vibe': 'upscale', 'busy_level': 85, 'rating': 4.8, 'review_count': 763, 'capacity': 300,
-        'phone': '+1 416-555-0203', 'is_open': True, 'is_featured': True,
+        'phone': '+1 416-555-0203', 'is_open': True, 'is_featured': True, 'price_level': 4,
     },
     {
         'name': 'Bar Raval',
@@ -139,7 +139,7 @@ VENUES = [
         'category': 'lounge',
         'description': 'Stunning Art Nouveau-inspired pintxos bar on College Street. One of the most beautifully designed bars in the world, with exceptional Spanish wines.',
         'vibe': 'romantic', 'busy_level': 62, 'rating': 4.9, 'review_count': 618, 'capacity': 90,
-        'phone': '+1 416-555-0204', 'is_open': True, 'is_featured': True,
+        'phone': '+1 416-555-0204', 'is_open': True, 'is_featured': True, 'price_level': 3,
     },
     {
         'name': 'The Drake Hotel',
@@ -150,7 +150,7 @@ VENUES = [
         'category': 'live-music',
         'description': 'Toronto cultural icon on Queen West. Live music, art shows, DJ nights, and an eclectic crowd across three rooms. The heartbeat of Toronto\'s arts scene.',
         'vibe': 'casual', 'busy_level': 72, 'rating': 4.6, 'review_count': 934, 'capacity': 250,
-        'phone': '+1 416-555-0205', 'is_open': True, 'is_featured': False,
+        'phone': '+1 416-555-0205', 'is_open': True, 'is_featured': False, 'price_level': 2,
     },
     {
         'name': 'Baro',
@@ -161,7 +161,7 @@ VENUES = [
         'category': 'restaurant',
         'description': 'Upscale Latin restaurant and bar in King West. Vibrant atmosphere, exceptional ceviche, and a rooftop patio that stays packed all summer.',
         'vibe': 'upscale', 'busy_level': 68, 'rating': 4.7, 'review_count': 512, 'capacity': 180,
-        'phone': '+1 416-555-0206', 'is_open': True, 'is_featured': False,
+        'phone': '+1 416-555-0206', 'is_open': True, 'is_featured': False, 'price_level': 3,
     },
     {
         'name': 'Velvet Underground',
@@ -172,7 +172,7 @@ VENUES = [
         'category': 'live-music',
         'description': 'Legendary Queen West venue for alternative, indie, and rock. Low ceilings, loud music, cold beer — a Toronto institution since 1994.',
         'vibe': 'lively', 'busy_level': 71, 'rating': 4.5, 'review_count': 381, 'capacity': 300,
-        'phone': '+1 416-555-0207', 'is_open': False, 'is_featured': False,
+        'phone': '+1 416-555-0207', 'is_open': False, 'is_featured': False, 'price_level': 1,
     },
     {
         'name': 'TIFF Lightbox Rooftop',
@@ -183,7 +183,7 @@ VENUES = [
         'category': 'events',
         'description': 'Exclusive rooftop event space at TIFF Bell Lightbox in the Entertainment District. Film premieres, private events, and cultural happenings year-round.',
         'vibe': 'upscale', 'busy_level': 55, 'rating': 4.8, 'review_count': 234, 'capacity': 400,
-        'phone': '+1 416-555-0208', 'is_open': False, 'is_featured': True,
+        'phone': '+1 416-555-0208', 'is_open': False, 'is_featured': True, 'price_level': 4,
     },
 ]
 

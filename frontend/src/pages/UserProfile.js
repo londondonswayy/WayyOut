@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import { Link } from 'react-router-dom';
 import { updateUser } from '../store/slices/authSlice';
 import { authAPI, adAPI } from '../services/api';
 import { toast } from 'react-toastify';
@@ -83,15 +84,30 @@ export default function UserProfile() {
     <div className="pt-20 min-h-screen max-w-2xl mx-auto px-4 py-8">
       <h1 className="font-display font-bold text-3xl text-white mb-8">{t('profile.title')}</h1>
 
-      {/* Avatar */}
-      <div className="card p-6 mb-6 flex items-center space-x-4">
-        <div className="w-20 h-20 bg-primary/20 border-2 border-primary/40 rounded-full flex items-center justify-center text-primary font-display font-bold text-3xl">
-          {user?.full_name?.[0]?.toUpperCase()}
+      {/* Avatar + social shortcuts */}
+      <div className="card p-6 mb-6">
+        <div className="flex items-center space-x-4 mb-4">
+          <div className="w-20 h-20 bg-primary/20 border-2 border-primary/40 rounded-full flex items-center justify-center text-primary font-display font-bold text-3xl">
+            {user?.full_name?.[0]?.toUpperCase()}
+          </div>
+          <div>
+            <p className="font-display font-bold text-xl text-white">{user?.full_name}</p>
+            <p className="text-gray-400">{user?.email}</p>
+            <span className="badge bg-primary/20 text-primary capitalize mt-1">{user?.role?.replace('_', ' ')}</span>
+          </div>
         </div>
-        <div>
-          <p className="font-display font-bold text-xl text-white">{user?.full_name}</p>
-          <p className="text-gray-400">{user?.email}</p>
-          <span className="badge bg-primary/20 text-primary capitalize mt-1">{user?.role?.replace('_', ' ')}</span>
+        <div className="flex gap-3 flex-wrap">
+          <Link to="/friends" className="btn-primary text-sm py-2 px-4">👥 Friends</Link>
+          <Link to="/messages" className="btn-ghost text-sm py-2 px-4">💬 Messages</Link>
+          <button
+            onClick={() => {
+              navigator.clipboard.writeText(`${window.location.origin}/register`);
+              toast.success('Invite link copied!', { icon: '🎉' });
+            }}
+            className="btn-ghost text-sm py-2 px-4"
+          >
+            🎉 Invite friends
+          </button>
         </div>
       </div>
 

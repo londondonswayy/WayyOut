@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Venue, Category, VenuePhoto, OpeningHours, VenueAvailability, VenueReview
+from .models import Venue, Category, VenuePhoto, OpeningHours, VenueAvailability, VenueReview, VenueAttendance
 from apps.users.serializers import UserSerializer
 
 
@@ -52,7 +52,7 @@ class VenueListSerializer(serializers.ModelSerializer):
             'id', 'name', 'slug', 'category', 'address', 'city',
             'latitude', 'longitude', 'cover_image', 'logo',
             'is_open', 'busy_level', 'vibe', 'rating', 'review_count',
-            'is_featured', 'distance'
+            'is_featured', 'distance', 'price_level'
         ]
 
 
@@ -71,7 +71,7 @@ class VenueDetailSerializer(serializers.ModelSerializer):
             'phone', 'email', 'website', 'cover_image', 'logo',
             'status', 'is_open', 'is_featured', 'busy_level', 'vibe',
             'capacity', 'current_occupancy', 'rating', 'review_count',
-            'commission_rate', 'photos', 'opening_hours', 'reviews',
+            'commission_rate', 'price_level', 'photos', 'opening_hours', 'reviews',
             'created_at', 'updated_at'
         ]
         read_only_fields = ['id', 'slug', 'status', 'rating', 'review_count', 'created_at', 'updated_at']
@@ -93,3 +93,10 @@ class VenueCreateUpdateSerializer(serializers.ModelSerializer):
         name = validated_data.get('name', '')
         validated_data['slug'] = f"{slugify(name)}-{uuid.uuid4().hex[:8]}"
         return super().create(validated_data)
+
+
+class VenueAttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = VenueAttendance
+        fields = ['id', 'venue', 'date', 'created_at']
+        read_only_fields = ['id', 'created_at']

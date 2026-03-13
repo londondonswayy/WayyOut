@@ -3,13 +3,15 @@ from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.db.models import Q, F, FloatField, ExpressionWrapper
 from django.db.models.functions import Radians, Power, Sin, Cos, ATan2, Sqrt
+from django.utils import timezone
 import math
-from .models import Venue, Category, VenuePhoto, OpeningHours, VenueAvailability, VenueReview
+from .models import Venue, Category, VenuePhoto, OpeningHours, VenueAvailability, VenueReview, VenueAttendance
 from .serializers import (
     VenueListSerializer, VenueDetailSerializer, VenueCreateUpdateSerializer,
     CategorySerializer, VenuePhotoSerializer, OpeningHoursSerializer,
-    VenueAvailabilitySerializer, VenueReviewSerializer
+    VenueAvailabilitySerializer, VenueReviewSerializer, VenueAttendanceSerializer
 )
+from apps.users.models import Friendship
 
 
 class IsVenueOwnerOrAdmin(permissions.BasePermission):
@@ -210,3 +212,49 @@ class TrendingVenuesView(generics.ListAPIView):
         return Venue.objects.filter(
             status=Venue.STATUS_APPROVED,
         ).order_by('-busy_level', '-rating')[:10]
+
+
+class VenueAttendanceToggleView(generics.GenericAPIView):
+    """Toggle 'going tonight' for the authenticated user"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, slug):
+        venue = generics.get_object_or_404(Venue, slug=slug, status=Venue.STATUS_APPROVED)
+        today = timezone.now().date()
+        obj, created = VenueAttendance.objects.get_or_create(user=request.user, venue=venue, date=today)
+        if not created:
+            obj.delete()
+            return Response({'going': False})
+        return Response({'going': True}, status=201)
+
+    def get(self, request, slug):
+        venue = generics.get_object_or_404(Venue, slug=slug, status=Venue.STATUS_APPROVED)
+        today = timezone.now().date()
+        going = VenueAttendance.objects.filter(user=request.user, venue=venue, date=today).exists()
+        return Response({'going': going})
+
+
+class VenueFriendsGoingView(generics.GenericAPIView):
+    """List accepted friends who are going to this venue today"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, slug):
+        venue = generics.get_object_or_404(Venue, slug=slug, status=Venue.STATUS_APPROVED)
+        today = timezone.now().date()
+
+        # Get all friend user IDs
+        friendships = Friendship.objects.filter(
+            Q(from_user=request.user) | Q(to_user=request.user),
+            status='accepted'
+        )
+        friend_ids = set()
+        for f in friendships:
+            other = f.to_user if f.from_user == request.user else f.from_user
+            friend_ids.add(other.id)
+
+        attendances = VenueAttendance.objects.filter(
+            venue=venue, date=today, user_id__in=friend_ids
+        ).select_related('user')
+
+        data = [{'id': a.user.id, 'full_name': a.user.full_name, 'city': a.user.city} for a in attendances]
+        return Response({'friends_going': data, 'count': len(data)})

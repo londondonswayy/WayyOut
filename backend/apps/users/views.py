@@ -4,11 +4,12 @@ from rest_framework.response import Response
 from rest_framework_simplejwt.views import TokenObtainPairView
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.core.cache import cache
-from .models import User
+from django.db.models import Q
+from .models import User, Friendship, DirectMessage
 from .serializers import (
     UserRegistrationSerializer, UserSerializer,
     UserProfileUpdateSerializer, CustomTokenObtainPairSerializer,
-    ChangePasswordSerializer
+    ChangePasswordSerializer, FriendSerializer, DirectMessageSerializer
 )
 
 # Brute-force constants
@@ -138,3 +139,162 @@ class AdminUserDetailView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = UserSerializer
     permission_classes = [permissions.IsAdminUser]
     queryset = User.objects.all()
+
+
+class UserSearchView(generics.ListAPIView):
+    """Search for users to add as friends"""
+    serializer_class = UserSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        q = self.request.query_params.get('q', '').strip()
+        if len(q) < 2:
+            return User.objects.none()
+        return User.objects.filter(
+            Q(full_name__icontains=q) | Q(email__icontains=q)
+        ).exclude(id=self.request.user.id).filter(is_active=True)[:20]
+
+
+class FriendRequestView(generics.GenericAPIView):
+    """Send a friend request"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, user_id):
+        to_user = generics.get_object_or_404(User, id=user_id)
+        if to_user == request.user:
+            return Response({'error': 'Cannot add yourself.'}, status=400)
+        # Check reverse friendship exists
+        existing = Friendship.objects.filter(
+            Q(from_user=request.user, to_user=to_user) |
+            Q(from_user=to_user, to_user=request.user)
+        ).first()
+        if existing:
+            return Response({'error': 'Request already exists.', 'status': existing.status}, status=400)
+        f = Friendship.objects.create(from_user=request.user, to_user=to_user)
+        return Response({'message': 'Friend request sent.', 'id': f.id}, status=201)
+
+
+class FriendAcceptView(generics.GenericAPIView):
+    """Accept a pending friend request"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def post(self, request, request_id):
+        f = generics.get_object_or_404(Friendship, id=request_id, to_user=request.user, status='pending')
+        f.status = 'accepted'
+        f.save()
+        return Response({'message': 'Friend request accepted.'})
+
+
+class FriendRejectView(generics.GenericAPIView):
+    """Reject or remove a friend"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def delete(self, request, request_id):
+        f = generics.get_object_or_404(
+            Friendship, id=request_id,
+            **{'from_user': request.user} if Friendship.objects.filter(id=request_id, from_user=request.user).exists()
+            else {'to_user': request.user}
+        )
+        f.delete()
+        return Response(status=204)
+
+    def post(self, request, request_id):
+        return self.delete(request, request_id)
+
+
+class FriendListView(generics.GenericAPIView):
+    """List accepted friends and pending requests"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        friends = Friendship.objects.filter(
+            Q(from_user=user) | Q(to_user=user), status='accepted'
+        ).select_related('from_user', 'to_user')
+        pending_received = Friendship.objects.filter(to_user=user, status='pending').select_related('from_user')
+        pending_sent = Friendship.objects.filter(from_user=user, status='pending').select_related('to_user')
+
+        def user_info(u):
+            return {'id': u.id, 'full_name': u.full_name, 'email': u.email, 'city': u.city}
+
+        friends_data = []
+        for f in friends:
+            other = f.to_user if f.from_user == user else f.from_user
+            friends_data.append({'friendship_id': f.id, **user_info(other)})
+
+        received_data = []
+        for f in pending_received:
+            received_data.append({'friendship_id': f.id, **user_info(f.from_user)})
+
+        sent_data = []
+        for f in pending_sent:
+            sent_data.append({'friendship_id': f.id, **user_info(f.to_user)})
+
+        return Response({
+            'friends': friends_data,
+            'pending_received': received_data,
+            'pending_sent': sent_data,
+        })
+
+
+class ConversationListView(generics.GenericAPIView):
+    """List all DM conversations (latest message per user)"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request):
+        user = request.user
+        messages = DirectMessage.objects.filter(
+            Q(sender=user) | Q(receiver=user)
+        ).order_by('-created_at')
+
+        seen = set()
+        conversations = []
+        for msg in messages:
+            other = msg.receiver if msg.sender == user else msg.sender
+            if other.id not in seen:
+                seen.add(other.id)
+                unread = DirectMessage.objects.filter(sender=other, receiver=user, read=False).count()
+                conversations.append({
+                    'user_id': other.id,
+                    'full_name': other.full_name,
+                    'last_message': msg.content,
+                    'last_message_at': msg.created_at,
+                    'unread': unread,
+                })
+        return Response(conversations)
+
+
+class MessageThreadView(generics.GenericAPIView):
+    """Get/send messages with a specific user"""
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get(self, request, user_id):
+        other = generics.get_object_or_404(User, id=user_id)
+        # Must be friends
+        is_friend = Friendship.objects.filter(
+            Q(from_user=request.user, to_user=other) | Q(from_user=other, to_user=request.user),
+            status='accepted'
+        ).exists()
+        if not is_friend:
+            return Response({'error': 'You must be friends to message.'}, status=403)
+        messages = DirectMessage.objects.filter(
+            Q(sender=request.user, receiver=other) | Q(sender=other, receiver=request.user)
+        ).order_by('created_at')
+        # Mark incoming as read
+        messages.filter(receiver=request.user, read=False).update(read=True)
+        data = DirectMessageSerializer(messages, many=True).data
+        return Response(data)
+
+    def post(self, request, user_id):
+        other = generics.get_object_or_404(User, id=user_id)
+        is_friend = Friendship.objects.filter(
+            Q(from_user=request.user, to_user=other) | Q(from_user=other, to_user=request.user),
+            status='accepted'
+        ).exists()
+        if not is_friend:
+            return Response({'error': 'You must be friends to message.'}, status=403)
+        content = request.data.get('content', '').strip()
+        if not content:
+            return Response({'error': 'Message cannot be empty.'}, status=400)
+        msg = DirectMessage.objects.create(sender=request.user, receiver=other, content=content)
+        return Response(DirectMessageSerializer(msg).data, status=201)

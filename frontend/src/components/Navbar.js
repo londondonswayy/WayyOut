@@ -77,6 +77,13 @@ export default function Navbar() {
                   <span>✨</span><span>{t('nav.aiGuide')}</span>
                 </button>
 
+                {/* Messages */}
+                <Link to="/messages" className="p-2 text-gray-400 hover:text-white transition-colors hidden md:flex items-center" title="Messages">
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-3 3v-3z" />
+                  </svg>
+                </Link>
+
                 {/* Notifications */}
                 <Link to="/reservations" className="relative p-2 text-gray-400 hover:text-white transition-colors">
                   <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -105,6 +112,8 @@ export default function Navbar() {
                         </span>
                       </div>
                       <Link to="/profile" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.profile')}</Link>
+                      <Link to="/friends" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">👥 Friends</Link>
+                      <Link to="/messages" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">💬 Messages</Link>
                       <Link to="/reservations" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.reservations')}</Link>
                       {user?.role === 'venue_owner' && (
                         <Link to="/venue-dashboard" onClick={() => setMenuOpen(false)} className="block px-4 py-2 text-sm text-gray-300 hover:text-white hover:bg-dark-border transition-colors">{t('nav.myVenues')}</Link>
@@ -162,6 +171,12 @@ export default function Navbar() {
               )}
               <Link to="/profile" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
                 👤 {t('nav.profile')}
+              </Link>
+              <Link to="/friends" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
+                👥 Friends
+              </Link>
+              <Link to="/messages" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
+                💬 Messages
               </Link>
               <Link to="/reservations" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
                 📋 {t('nav.reservations')}

@@ -1,7 +1,7 @@
 import re
 from rest_framework import serializers
 from rest_framework_simplejwt.serializers import TokenObtainPairSerializer
-from .models import User
+from .models import User, Friendship, DirectMessage
 
 # Common weak / breached passwords to block
 WEAK_PASSWORDS = {'password', 'password1', '12345678', 'qwerty123', 'letmein1', 'welcome1', 'wayyout'}
@@ -134,3 +134,34 @@ class ChangePasswordSerializer(serializers.Serializer):
         if data['new_password'] == data['old_password']:
             raise serializers.ValidationError({'new_password': 'New password must differ from the current password.'})
         return data
+
+
+class FriendSerializer(serializers.ModelSerializer):
+    """Serializes a friendship with the other user's info"""
+    id = serializers.IntegerField(source='pk')
+    user = serializers.SerializerMethodField()
+    status = serializers.CharField()
+
+    class Meta:
+        model = Friendship
+        fields = ['id', 'user', 'status', 'created_at']
+
+    def get_user(self, obj):
+        request_user = self.context.get('request_user')
+        other = obj.to_user if obj.from_user == request_user else obj.from_user
+        return {
+            'id': other.id,
+            'full_name': other.full_name,
+            'email': other.email,
+            'city': other.city,
+        }
+
+
+class DirectMessageSerializer(serializers.ModelSerializer):
+    sender_name = serializers.CharField(source='sender.full_name', read_only=True)
+    receiver_name = serializers.CharField(source='receiver.full_name', read_only=True)
+
+    class Meta:
+        model = DirectMessage
+        fields = ['id', 'sender', 'sender_name', 'receiver', 'receiver_name', 'content', 'read', 'created_at']
+        read_only_fields = ['id', 'sender', 'sender_name', 'receiver_name', 'read', 'created_at']

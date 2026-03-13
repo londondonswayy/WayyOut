@@ -3,7 +3,8 @@ from .views import (
     CategoryListView, VenueListView, VenueDetailView, VenueCreateView,
     VenueUpdateView, MyVenuesView, VenueAvailabilityView, OpeningHoursView,
     toggle_venue_open, update_busy_level, VenueReviewCreateView,
-    AdminVenueListView, approve_venue, reject_venue, TrendingVenuesView
+    AdminVenueListView, approve_venue, reject_venue, TrendingVenuesView,
+    VenueAttendanceToggleView, VenueFriendsGoingView
 )
 
 urlpatterns = [
@@ -19,6 +20,8 @@ urlpatterns = [
     path('<slug:slug>/availability/', VenueAvailabilityView.as_view(), name='venue-availability'),
     path('<slug:slug>/hours/', OpeningHoursView.as_view(), name='opening-hours'),
     path('<slug:slug>/reviews/', VenueReviewCreateView.as_view(), name='venue-reviews'),
+    path('<slug:slug>/going/', VenueAttendanceToggleView.as_view(), name='venue-going'),
+    path('<slug:slug>/friends-going/', VenueFriendsGoingView.as_view(), name='venue-friends-going'),
 
     # Admin
     path('admin/list/', AdminVenueListView.as_view(), name='admin-venue-list'),

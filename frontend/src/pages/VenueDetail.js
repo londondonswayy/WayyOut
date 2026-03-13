@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { openReservationModal } from '../store/slices/uiSlice';
-import { venueAPI } from '../services/api';
+import { venueAPI, socialAPI } from '../services/api';
 import StoriesFeed from '../components/StoriesFeed';
 import ReservationModal from '../components/ReservationModal';
 import { useSelector } from 'react-redux';
@@ -70,16 +70,54 @@ function WhoIsGoing({ venue, t }) {
   );
 }
 
+function FriendsGoing({ slug, isAuthenticated }) {
+  const [data, setData] = useState({ friends_going: [], count: 0 });
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    socialAPI.friendsGoing(slug).then(r => setData(r.data)).catch(() => {});
+  }, [slug, isAuthenticated]);
+
+  if (!isAuthenticated || data.count === 0) return null;
+
+  const COLORS = ['#7C3AED', '#14B8A6', '#F59E0B', '#EC4899', '#3B82F6'];
+
+  return (
+    <div className="card p-4 mb-6 border border-primary/20">
+      <div className="flex items-center gap-2 mb-3">
+        <span className="text-primary">👥</span>
+        <h3 className="font-semibold text-white text-sm">Friends going tonight</h3>
+        <span className="text-xs text-primary ml-auto">{data.count} friend{data.count > 1 ? 's' : ''}</span>
+      </div>
+      <div className="flex items-center gap-2">
+        {data.friends_going.slice(0, 5).map((f, i) => (
+          <div key={f.id} title={f.full_name}
+            className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-bold flex-shrink-0 ring-2 ring-dark-card"
+            style={{ backgroundColor: COLORS[i % COLORS.length], marginLeft: i > 0 ? '-6px' : 0 }}>
+            {f.full_name[0]}
+          </div>
+        ))}
+        <span className="text-gray-400 text-xs ml-2">
+          {data.friends_going.slice(0, 3).map(f => f.full_name.split(' ')[0]).join(', ')}
+          {data.count > 3 ? ` +${data.count - 3} more` : ''}
+        </span>
+      </div>
+    </div>
+  );
+}
+
 export default function VenueDetail() {
   const { slug } = useParams();
   const dispatch = useDispatch();
   const { t } = useTranslation();
   const { reservationModal } = useSelector((state) => state.ui);
+  const { isAuthenticated } = useSelector((state) => state.auth);
   const [venue, setVenue] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState('about');
   const [review, setReview] = useState({ rating: 5, comment: '' });
   const [submittingReview, setSubmittingReview] = useState(false);
+  const [going, setGoing] = useState(false);
+  const [goingLoading, setGoingLoading] = useState(false);
 
   useEffect(() => {
     const fetch = async () => {
@@ -93,7 +131,20 @@ export default function VenueDetail() {
       }
     };
     fetch();
-  }, [slug]);
+    if (isAuthenticated) {
+      socialAPI.isGoing(slug).then(r => setGoing(r.data.going)).catch(() => {});
+    }
+  }, [slug, isAuthenticated]);
+
+  const toggleGoing = async () => {
+    if (!isAuthenticated || goingLoading) return;
+    setGoingLoading(true);
+    try {
+      const r = await socialAPI.toggleGoing(slug);
+      setGoing(r.data.going);
+    } catch {}
+    finally { setGoingLoading(false); }
+  };
 
   const submitReview = async (e) => {
     e.preventDefault();
@@ -159,26 +210,47 @@ export default function VenueDetail() {
           <div>
             <h1 className="font-display font-bold text-4xl text-white">{venue.name}</h1>
             <p className="text-gray-400 mt-1">📍 {venue.address}, {venue.city}</p>
-            <div className="flex items-center gap-4 mt-2">
+            <div className="flex items-center gap-4 mt-2 flex-wrap">
               <div className="flex items-center space-x-1 text-yellow-400">
                 <span>★</span>
                 <span className="font-semibold">{Number(venue.rating).toFixed(1)}</span>
                 <span className="text-gray-500 text-sm">({venue.review_count} reviews)</span>
               </div>
+              {venue.price_level && (
+                <span className="text-sm font-medium">
+                  <span className="text-green-400">{'$'.repeat(venue.price_level)}</span>
+                  <span className="text-gray-700">{'$'.repeat(4 - venue.price_level)}</span>
+                </span>
+              )}
               {venue.vibe && (
                 <span className="badge bg-primary/20 text-primary capitalize">{venue.vibe}</span>
               )}
             </div>
           </div>
 
-          {venue.is_open && (
-            <button
-              onClick={() => dispatch(openReservationModal(venue))}
-              className="btn-primary px-8 py-3 text-lg"
-            >
-              {t('detail.reserveNow')}
-            </button>
-          )}
+          <div className="flex flex-col sm:flex-row gap-3">
+            {isAuthenticated && (
+              <button
+                onClick={toggleGoing}
+                disabled={goingLoading}
+                className={`px-6 py-3 rounded-2xl font-medium transition-all border ${
+                  going
+                    ? 'bg-green-500/20 border-green-500/50 text-green-400 hover:bg-green-500/30'
+                    : 'border-dark-border text-gray-400 hover:border-primary/50 hover:text-white'
+                }`}
+              >
+                {going ? '✓ Going tonight' : '+ Going tonight'}
+              </button>
+            )}
+            {venue.is_open && (
+              <button
+                onClick={() => dispatch(openReservationModal(venue))}
+                className="btn-primary px-8 py-3 text-lg"
+              >
+                {t('detail.reserveNow')}
+              </button>
+            )}
+          </div>
         </div>
 
         {/* Busy level */}
@@ -206,6 +278,9 @@ export default function VenueDetail() {
             )}
           </div>
         )}
+
+        {/* Friends going (only visible to friends) */}
+        <FriendsGoing slug={slug} isAuthenticated={isAuthenticated} />
 
         {/* Who's going tonight */}
         {venue.is_open && <WhoIsGoing venue={venue} t={t} />}

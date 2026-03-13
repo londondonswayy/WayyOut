@@ -79,6 +79,7 @@ class Venue(models.Model):
 
     # Commission
     commission_rate = models.DecimalField(max_digits=5, decimal_places=2, default=8.00)
+    price_level = models.IntegerField(default=2, choices=[(1, '$'), (2, '$$'), (3, '$$$'), (4, '$$$$')])
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -148,3 +149,14 @@ class VenueReview(models.Model):
     class Meta:
         db_table = 'venue_reviews'
         unique_together = ['venue', 'user']
+
+
+class VenueAttendance(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='attendances')
+    venue = models.ForeignKey(Venue, on_delete=models.CASCADE, related_name='attendances')
+    date = models.DateField()
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'venue_attendance'
+        unique_together = ['user', 'venue', 'date']

@@ -79,3 +79,38 @@ class User(AbstractBaseUser, PermissionsMixin):
     @property
     def is_admin_user(self):
         return self.role == self.ADMIN
+
+
+class Friendship(models.Model):
+    STATUS_PENDING = 'pending'
+    STATUS_ACCEPTED = 'accepted'
+    STATUS_CHOICES = [
+        (STATUS_PENDING, 'Pending'),
+        (STATUS_ACCEPTED, 'Accepted'),
+    ]
+    from_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_requests')
+    to_user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_requests')
+    status = models.CharField(max_length=10, choices=STATUS_CHOICES, default=STATUS_PENDING)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'friendships'
+        unique_together = ['from_user', 'to_user']
+
+    def __str__(self):
+        return f'{self.from_user} → {self.to_user} ({self.status})'
+
+
+class DirectMessage(models.Model):
+    sender = models.ForeignKey(User, on_delete=models.CASCADE, related_name='sent_messages')
+    receiver = models.ForeignKey(User, on_delete=models.CASCADE, related_name='received_messages')
+    content = models.TextField()
+    read = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'direct_messages'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.sender} → {self.receiver}: {self.content[:40]}'

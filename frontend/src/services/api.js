@@ -115,6 +115,21 @@ export const paymentAPI = {
   myPayments: () => api.get('/payments/my/'),
 };
 
+// Social (friends, messages, attendance)
+export const socialAPI = {
+  searchUsers: (q) => api.get('/auth/users/search/', { params: { q } }),
+  friends: () => api.get('/auth/friends/'),
+  sendRequest: (userId) => api.post(`/auth/friends/request/${userId}/`),
+  acceptRequest: (id) => api.post(`/auth/friends/${id}/accept/`),
+  rejectRequest: (id) => api.post(`/auth/friends/${id}/reject/`),
+  conversations: () => api.get('/auth/messages/'),
+  messages: (userId) => api.get(`/auth/messages/${userId}/`),
+  sendMessage: (userId, content) => api.post(`/auth/messages/${userId}/`, { content }),
+  toggleGoing: (slug) => api.post(`/venues/${slug}/going/`),
+  isGoing: (slug) => api.get(`/venues/${slug}/going/`),
+  friendsGoing: (slug) => api.get(`/venues/${slug}/friends-going/`),
+};
+
 // Ads
 export const adAPI = {
   feed: () => api.get('/ads/feed/'),
