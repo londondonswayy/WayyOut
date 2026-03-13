@@ -14,12 +14,12 @@ import { adAPI } from '../services/api';
 const CITIES = ['Montreal', 'Toronto'];
 
 const DEFAULT_CATEGORIES = [
-  { id: 'restaurant', slug: 'restaurant', icon: '🍽️', name: 'Restaurants' },
-  { id: 'nightclub',  slug: 'nightclub',  icon: '🎉', name: 'Nightlife'   },
-  { id: 'lounge',     slug: 'lounge',     icon: '🛋️', name: 'Lounges'    },
-  { id: 'live-music', slug: 'live-music', icon: '🎵', name: 'Live Music'  },
-  { id: 'events',     slug: 'events',     icon: '🎟️', name: 'Events'     },
-  { id: 'rooftop',    slug: 'rooftop',    icon: '🏙️', name: 'Rooftop'    },
+  { id: 'restaurant', slug: 'restaurant', icon: '🍽️', name: 'Restaurants', gradient: 'from-orange-500/30 to-red-600/20',    border: 'hover:border-orange-500/50' },
+  { id: 'nightclub',  slug: 'nightclub',  icon: '🎉', name: 'Nightlife',   gradient: 'from-purple-600/30 to-pink-600/20',   border: 'hover:border-purple-500/50' },
+  { id: 'lounge',     slug: 'lounge',     icon: '🛋️', name: 'Lounges',    gradient: 'from-blue-600/30 to-cyan-600/20',     border: 'hover:border-blue-500/50'   },
+  { id: 'live-music', slug: 'live-music', icon: '🎵', name: 'Live Music',  gradient: 'from-green-600/30 to-teal-600/20',    border: 'hover:border-green-500/50'  },
+  { id: 'events',     slug: 'events',     icon: '🎟️', name: 'Events',     gradient: 'from-yellow-500/30 to-orange-600/20', border: 'hover:border-yellow-500/50' },
+  { id: 'rooftop',    slug: 'rooftop',    icon: '🏙️', name: 'Rooftop',    gradient: 'from-indigo-600/30 to-violet-600/20', border: 'hover:border-indigo-500/50' },
 ];
 
 export default function Home() {
@@ -149,14 +149,25 @@ export default function Home() {
       </section>
 
       {/* ── CATEGORIES ───────────────────────────────────── */}
-      <section className="py-8 px-4 max-w-7xl mx-auto">
-        <h2 className="font-display font-bold text-2xl text-white mb-6">{t('home.categories.title')}</h2>
-        <div className="flex flex-wrap gap-3">
+      <section className="py-10 px-4 max-w-7xl mx-auto">
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h2 className="font-display font-bold text-2xl text-white">{t('home.categories.title')}</h2>
+            <p className="text-gray-500 text-sm mt-1">Find your vibe tonight</p>
+          </div>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-4">
           {(categories.length > 0 ? categories : DEFAULT_CATEGORIES).map((cat) => (
-            <Link key={cat.id} to={`/discover?category=${cat.slug}`}
-              className="flex items-center space-x-2 px-5 py-3 card hover:border-primary/50 transition-all hover:-translate-y-0.5 font-medium">
-              <span className="text-xl">{cat.icon}</span>
-              <span className="text-white text-sm">{cat.name}</span>
+            <Link
+              key={cat.id}
+              to={`/discover?category=${cat.slug}`}
+              className={`group relative overflow-hidden rounded-2xl border border-dark-border ${cat.border || 'hover:border-primary/50'} transition-all duration-300 hover:-translate-y-1 hover:shadow-lg hover:shadow-black/30`}
+            >
+              <div className={`absolute inset-0 bg-gradient-to-br ${cat.gradient || 'from-primary/20 to-accent-purple/20'} opacity-60 group-hover:opacity-100 transition-opacity duration-300`} />
+              <div className="relative p-5 flex flex-col items-center text-center gap-3">
+                <span className="text-4xl group-hover:scale-110 transition-transform duration-300">{cat.icon}</span>
+                <span className="text-white text-sm font-semibold leading-tight">{cat.name}</span>
+              </div>
             </Link>
           ))}
         </div>
