@@ -10,56 +10,61 @@
   }
 
   body {
-    @apply bg-dark text-white font-sans;
+    @apply bg-dark font-sans;
+    color: #E0E0F0;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
   }
 
   :root {
-    --primary: #7C3AED;
-    --dark: #07071A;
-    --dark-card: #0E0E28;
-    --dark-border: #1C1C42;
+    --primary: #8B5CF6;
+    --dark: #0D0D1F;
+    --dark-card: #16162E;
+    --dark-border: #252548;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-primary hover:bg-primary-dark text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200 active:scale-95 shadow-lg shadow-primary/25;
+    @apply bg-primary hover:bg-primary-dark font-medium px-6 py-3 rounded-2xl transition-all duration-200 active:scale-95;
+    color: #fff;
+    box-shadow: 0 4px 20px rgba(139, 92, 246, 0.2);
   }
 
   .btn-ghost {
-    @apply border border-dark-border hover:border-primary text-white font-semibold px-6 py-3 rounded-xl transition-all duration-200;
+    @apply border border-dark-border hover:border-primary/60 font-medium px-6 py-3 rounded-2xl transition-all duration-200;
+    color: #C4C4E0;
   }
 
   .card {
-    @apply bg-dark-card border border-dark-border rounded-2xl overflow-hidden;
+    @apply bg-dark-card border border-dark-border rounded-3xl overflow-hidden;
   }
 
   .input {
-    @apply w-full bg-dark-card border border-dark-border rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-primary transition-colors;
+    @apply w-full bg-dark-card border border-dark-border rounded-2xl px-4 py-3 placeholder-gray-600 focus:outline-none focus:border-primary/60 transition-colors;
+    color: #E0E0F0;
   }
 
   .badge {
-    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-semibold;
+    @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
   }
 
   .badge-open {
-    @apply badge bg-teal-500/20 text-teal-400;
+    @apply badge bg-teal-500/15 text-teal-400;
   }
 
   .badge-closed {
-    @apply badge bg-red-500/20 text-red-400;
+    @apply badge bg-gray-500/15 text-gray-400;
   }
 
   .badge-busy {
-    @apply badge bg-amber-500/20 text-amber-400;
+    @apply badge bg-amber-500/15 text-amber-400;
   }
 }
 
 /* Story ring animation */
 .story-ring {
-  background: linear-gradient(45deg, #7C3AED, #14B8A6, #F59E0B);
+  background: linear-gradient(45deg, #8B5CF6, #14B8A6, #F59E0B);
   padding: 2px;
   border-radius: 50%;
 }
@@ -98,14 +103,14 @@
 }
 
 ::-webkit-scrollbar-track {
-  background: #07071A;
+  background: #0D0D1F;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #1C1C42;
+  background: #252548;
   border-radius: 3px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #7C3AED;
+  background: #8B5CF6;
 }

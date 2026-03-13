@@ -112,7 +112,7 @@ export default function Register() {
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4 py-12"
-      style={{ background: 'linear-gradient(135deg, #07071A 0%, #12103A 50%, #07071A 100%)' }}>
+      style={{ background: 'linear-gradient(135deg, #0D0D1F 0%, #161635 50%, #0D0D1F 100%)' }}>
       <div className="w-full max-w-lg">
 
         <div className="text-center mb-8 mt-10">

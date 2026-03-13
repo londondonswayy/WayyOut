@@ -4,14 +4,14 @@ module.exports = {
     extend: {
       colors: {
         primary: {
-          DEFAULT: '#7C3AED',
-          dark: '#5B21B6',
-          light: '#A78BFA',
+          DEFAULT: '#8B5CF6',
+          dark: '#7C3AED',
+          light: '#C4B5FD',
         },
         dark: {
-          DEFAULT: '#07071A',
-          card: '#0E0E28',
-          border: '#1C1C42',
+          DEFAULT: '#0D0D1F',
+          card: '#16162E',
+          border: '#252548',
         },
         accent: {
           gold: '#F59E0B',
