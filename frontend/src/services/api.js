@@ -94,6 +94,10 @@ export const storyAPI = {
   delete: (id) => api.delete(`/stories/${id}/`),
   view: (id) => api.post(`/stories/${id}/view/`),
   like: (id) => api.post(`/stories/${id}/like/`),
+  comments: (id) => api.get(`/stories/${id}/comments/`),
+  addComment: (id, text) => api.post(`/stories/${id}/comments/`, { text }),
+  deleteComment: (storyId, commentId) => api.delete(`/stories/${storyId}/comments/${commentId}/`),
+  shareToFriend: (id, friendId) => api.post(`/stories/${id}/share/`, { friend_id: friendId }),
   repost: (id, venueId) => api.post(`/stories/${id}/repost/`, { venue_id: venueId }),
 };
 

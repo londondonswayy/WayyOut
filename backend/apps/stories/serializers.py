@@ -1,8 +1,18 @@
 from rest_framework import serializers
-from .models import Story, StoryView, StoryRepost, StoryLike
+from .models import Story, StoryView, StoryRepost, StoryLike, StoryComment
 from apps.users.serializers import UserSerializer
 from apps.venues.serializers import VenueListSerializer
 from django.utils import timezone
+
+
+class StoryCommentSerializer(serializers.ModelSerializer):
+    author_name = serializers.CharField(source='author.full_name', read_only=True)
+    author_id = serializers.IntegerField(source='author.id', read_only=True)
+
+    class Meta:
+        model = StoryComment
+        fields = ['id', 'author_id', 'author_name', 'text', 'created_at']
+        read_only_fields = ['id', 'author_id', 'author_name', 'created_at']
 
 
 class StorySerializer(serializers.ModelSerializer):
@@ -12,13 +22,17 @@ class StorySerializer(serializers.ModelSerializer):
     has_viewed = serializers.SerializerMethodField()
     like_count = serializers.SerializerMethodField()
     liked = serializers.SerializerMethodField()
+    comment_count = serializers.SerializerMethodField()
+    preview_comments = serializers.SerializerMethodField()
 
     class Meta:
         model = Story
         fields = [
             'id', 'venue', 'author', 'source', 'media', 'thumbnail',
             'media_type', 'caption', 'vibe_tags', 'is_active',
-            'view_count', 'like_count', 'liked', 'created_at', 'expires_at', 'is_expired', 'has_viewed'
+            'view_count', 'like_count', 'liked',
+            'comment_count', 'preview_comments',
+            'created_at', 'expires_at', 'is_expired', 'has_viewed',
         ]
         read_only_fields = ['id', 'author', 'view_count', 'created_at', 'expires_at']
 
@@ -36,6 +50,14 @@ class StorySerializer(serializers.ModelSerializer):
         if request and request.user.is_authenticated:
             return StoryLike.objects.filter(story=obj, user=request.user).exists()
         return False
+
+    def get_comment_count(self, obj):
+        return obj.comments.count()
+
+    def get_preview_comments(self, obj):
+        # Return last 2 comments for inline preview
+        recent = obj.comments.order_by('-created_at')[:2]
+        return StoryCommentSerializer(reversed(list(recent)), many=True).data
 
 
 class StoryCreateSerializer(serializers.ModelSerializer):

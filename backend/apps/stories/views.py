@@ -2,8 +2,8 @@ from rest_framework import generics, status, permissions
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from django.utils import timezone
-from .models import Story, StoryView, StoryRepost, StoryLike
-from .serializers import StorySerializer, StoryCreateSerializer
+from .models import Story, StoryView, StoryRepost, StoryLike, StoryComment
+from .serializers import StorySerializer, StoryCreateSerializer, StoryCommentSerializer
 
 
 class StoryFeedView(generics.ListAPIView):
@@ -84,163 +84,131 @@ def like_story(request, pk):
     return Response({'liked': True, 'like_count': story.likes.count()}, status=201)
 
 
+@api_view(['GET', 'POST'])
+@permission_classes([permissions.IsAuthenticatedOrReadOnly])
+def story_comments(request, pk):
+    story = Story.objects.get(pk=pk, is_active=True)
+    if request.method == 'GET':
+        comments = story.comments.select_related('author').order_by('created_at')
+        return Response(StoryCommentSerializer(comments, many=True).data)
+
+    # POST — add comment
+    text = request.data.get('text', '').strip()
+    if not text:
+        return Response({'error': 'Comment cannot be empty.'}, status=400)
+    if len(text) > 500:
+        return Response({'error': 'Comment too long (max 500 chars).'}, status=400)
+    comment = StoryComment.objects.create(story=story, author=request.user, text=text)
+    return Response(StoryCommentSerializer(comment).data, status=201)
+
+
+@api_view(['DELETE'])
+@permission_classes([permissions.IsAuthenticated])
+def delete_comment(request, pk, comment_id):
+    comment = StoryComment.objects.get(pk=comment_id, story_id=pk, author=request.user)
+    comment.delete()
+    return Response(status=204)
+
+
+@api_view(['POST'])
+@permission_classes([permissions.IsAuthenticated])
+def share_to_friend(request, pk):
+    """
+    Sends a DM to a friend with a link to this post.
+    Body: { friend_id: int }
+    """
+    from apps.users.models import User, Friendship, DirectMessage
+    from django.db.models import Q
+
+    story = Story.objects.get(pk=pk, is_active=True)
+    friend_id = request.data.get('friend_id')
+    if not friend_id:
+        return Response({'error': 'friend_id required.'}, status=400)
+
+    friend = User.objects.get(pk=friend_id)
+    is_friend = Friendship.objects.filter(
+        Q(from_user=request.user, to_user=friend) | Q(from_user=friend, to_user=request.user),
+        status='accepted'
+    ).exists()
+    if not is_friend:
+        return Response({'error': 'You must be friends to share.'}, status=403)
+
+    venue_part = f" at {story.venue.name}" if story.venue else ""
+    caption_part = f" — \"{story.caption}\"" if story.caption else ""
+    msg_text = f"📸 {request.user.full_name} shared a post{venue_part}{caption_part}"
+
+    DirectMessage.objects.create(sender=request.user, receiver=friend, content=msg_text)
+    return Response({'sent': True})
+
+
 @api_view(['GET'])
 @permission_classes([permissions.AllowAny])
 def social_feed(request):
     """
-    Aggregated social feed combining stories, friend activity, reviews, and venue updates.
-    Returns a list of feed items sorted by recency.
-    Supports ?page=N&city=X query params.
+    Social feed: only real venue posts and customer posts.
+    No generated/fake activity. Sorted by recency with pagination.
+    Supports ?page=N&city=X
     """
-    from apps.venues.models import Venue, VenueReview, VenueAttendance
-    from apps.users.models import Friendship
-    from apps.venues.serializers import VenueListSerializer
-    from django.db.models import Q
-    import math
-
     page = int(request.query_params.get('page', 1))
-    page_size = 10
+    page_size = 12
     city = request.query_params.get('city', '')
     offset = (page - 1) * page_size
 
-    # Determine friend IDs for the requesting user
-    friend_ids = set()
-    if request.user.is_authenticated:
-        friendships = Friendship.objects.filter(
-            Q(from_user=request.user) | Q(to_user=request.user),
-            status='accepted'
-        )
-        for f in friendships:
-            other = f.to_user if f.from_user == request.user else f.from_user
-            friend_ids.add(other.id)
+    # Stories: venue posts + customer posts only — no expiry filter for the feed
+    qs = Story.objects.filter(is_active=True).select_related(
+        'author', 'venue', 'venue__category'
+    ).prefetch_related('likes', 'comments').order_by('-created_at')
 
-    feed_items = []
-
-    # 1. STORIES — as feed posts (photos/videos)
-    stories_qs = Story.objects.filter(
-        is_active=True,
-        expires_at__gt=timezone.now()
-    ).select_related('author', 'venue', 'venue__category').order_by('-created_at')
     if city:
-        stories_qs = stories_qs.filter(
+        from django.db.models import Q
+        qs = qs.filter(
             Q(venue__city__icontains=city) | Q(author__city__icontains=city)
         )
 
-    for story in stories_qs[:40]:
+    total = qs.count()
+    stories = qs[offset: offset + page_size]
+
+    results = []
+    for story in stories:
         liked = False
         if request.user.is_authenticated:
-            liked = StoryLike.objects.filter(story=story, user=request.user).exists()
-        feed_items.append({
-            'id': f'story_{story.id}',
-            'type': 'story',
+            liked = story.likes.filter(user=request.user).exists()
+
+        # Last 2 comments for preview
+        preview = list(story.comments.order_by('-created_at')[:2])
+        preview_data = [
+            {'id': c.id, 'author_name': c.author.full_name, 'author_id': c.author_id, 'text': c.text, 'created_at': c.created_at.isoformat()}
+            for c in reversed(preview)
+        ]
+
+        from apps.venues.serializers import VenueListSerializer
+        results.append({
+            'id': story.id,
+            'type': 'post',
+            'source': story.source,       # 'venue' or 'user'
             'created_at': story.created_at.isoformat(),
             'author': {
                 'id': story.author.id,
                 'full_name': story.author.full_name,
                 'city': story.author.city,
+                'role': story.author.role,
             },
             'venue': VenueListSerializer(story.venue).data if story.venue else None,
             'media': request.build_absolute_uri(story.media.url) if story.media else None,
             'media_type': story.media_type,
             'caption': story.caption,
-            'vibe_tags': story.vibe_tags,
+            'vibe_tags': story.vibe_tags or [],
             'view_count': story.view_count,
             'like_count': story.likes.count(),
             'liked': liked,
-            'story_id': story.id,
-            'is_friend': story.author.id in friend_ids,
+            'comment_count': story.comments.count(),
+            'preview_comments': preview_data,
         })
-
-    # 2. FRIEND ATTENDANCE — "Name is going to Venue tonight"
-    attendance_qs = VenueAttendance.objects.filter(
-        date=timezone.now().date()
-    ).select_related('user', 'venue', 'venue__category').order_by('-created_at')
-    if city:
-        attendance_qs = attendance_qs.filter(venue__city__icontains=city)
-    # Show own attendance + friends' attendance
-    if request.user.is_authenticated:
-        attendance_qs = attendance_qs.filter(
-            Q(user__in=friend_ids) | Q(user=request.user)
-        )
-    else:
-        attendance_qs = attendance_qs[:20]
-
-    for att in attendance_qs[:20]:
-        feed_items.append({
-            'id': f'going_{att.id}',
-            'type': 'going',
-            'created_at': att.created_at.isoformat(),
-            'author': {
-                'id': att.user.id,
-                'full_name': att.user.full_name,
-                'city': att.user.city,
-            },
-            'venue': VenueListSerializer(att.venue).data,
-            'text': f"{att.user.full_name.split()[0]} is going to {att.venue.name} tonight 🎉",
-            'is_friend': att.user.id in friend_ids,
-        })
-
-    # 3. RECENT REVIEWS
-    reviews_qs = VenueReview.objects.select_related('user', 'venue', 'venue__category').order_by('-created_at')
-    if city:
-        reviews_qs = reviews_qs.filter(venue__city__icontains=city)
-
-    for rev in reviews_qs[:20]:
-        stars = '⭐' * rev.rating
-        feed_items.append({
-            'id': f'review_{rev.id}',
-            'type': 'review',
-            'created_at': rev.created_at.isoformat(),
-            'author': {
-                'id': rev.user.id,
-                'full_name': rev.user.full_name,
-                'city': rev.user.city,
-            },
-            'venue': VenueListSerializer(rev.venue).data,
-            'text': rev.comment,
-            'rating': rev.rating,
-            'stars': stars,
-            'is_friend': rev.user.id in friend_ids,
-        })
-
-    # 4. VENUE OPENS / TRENDING UPDATES (non-personalized discovery)
-    open_venues_qs = Venue.objects.filter(
-        status=Venue.STATUS_APPROVED, is_open=True
-    ).select_related('category').order_by('-busy_level', '-rating')
-    if city:
-        open_venues_qs = open_venues_qs.filter(city__icontains=city)
-
-    from datetime import datetime, timezone as dt_tz
-    for i, venue in enumerate(open_venues_qs[:10]):
-        ts = (datetime.now(dt_tz.utc).replace(microsecond=0).isoformat())
-        vibe_emoji = {'casual': '😎', 'lively': '🔥', 'romantic': '💕', 'upscale': '✨', 'party': '🎉'}.get(venue.vibe, '🏢')
-        buzz_text = (
-            f"🔥 Packed tonight" if venue.busy_level > 70 else
-            f"🎵 Good energy" if venue.busy_level > 40 else
-            f"😎 Chill vibes"
-        )
-        feed_items.append({
-            'id': f'venue_{venue.id}_{i}',
-            'type': 'venue_update',
-            'created_at': ts,
-            'venue': VenueListSerializer(venue).data,
-            'text': f"{venue.name} is open now {vibe_emoji}",
-            'subtext': buzz_text,
-            'busy_level': venue.busy_level,
-        })
-
-    # Sort all items by created_at descending
-    feed_items.sort(key=lambda x: x['created_at'], reverse=True)
-
-    # Pagination
-    total = len(feed_items)
-    paginated = feed_items[offset: offset + page_size]
-    has_next = offset + page_size < total
 
     return Response({
-        'results': paginated,
+        'results': results,
         'page': page,
-        'has_next': has_next,
+        'has_next': offset + page_size < total,
         'total': total,
     })
 

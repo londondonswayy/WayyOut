@@ -84,3 +84,17 @@ class StoryLike(models.Model):
     class Meta:
         db_table = 'story_likes'
         unique_together = ['story', 'user']
+
+
+class StoryComment(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name='comments')
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='story_comments')
+    text = models.CharField(max_length=500)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'story_comments'
+        ordering = ['created_at']
+
+    def __str__(self):
+        return f'{self.author.full_name}: {self.text[:40]}'
