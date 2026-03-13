@@ -20,7 +20,7 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0A0A0F] flex items-center justify-center px-4">
+    <div className="min-h-screen bg-[#07071A] flex items-center justify-center px-4">
       <div className="w-full max-w-sm">
         <div className="text-center mb-8">
           <div className="w-14 h-14 bg-primary rounded-2xl flex items-center justify-center mx-auto mb-4">
@@ -34,7 +34,7 @@ export default function AdminLogin() {
           <form onSubmit={handleSubmit} className="space-y-4">
             {error && (
               <div className="bg-red-500/10 border border-red-500/30 rounded-xl px-4 py-3 text-red-400 text-sm">
-                Invalid credentials or insufficient permissions.
+                {error?.error || error?.detail || JSON.stringify(error)}
               </div>
             )}
             <div>
@@ -44,7 +44,7 @@ export default function AdminLogin() {
                 required
                 value={form.email}
                 onChange={(e) => setForm({ ...form, email: e.target.value })}
-                className="w-full bg-[#0A0A0F] border border-border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors text-sm"
+                className="w-full bg-[#07071A] border border-border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors text-sm"
                 placeholder="admin@wayout.app"
               />
             </div>
@@ -55,7 +55,7 @@ export default function AdminLogin() {
                 required
                 value={form.password}
                 onChange={(e) => setForm({ ...form, password: e.target.value })}
-                className="w-full bg-[#0A0A0F] border border-border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors text-sm"
+                className="w-full bg-[#07071A] border border-border rounded-xl px-4 py-3 text-white placeholder-gray-600 focus:outline-none focus:border-primary transition-colors text-sm"
                 placeholder="••••••••"
               />
             </div>

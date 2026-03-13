@@ -9,12 +9,17 @@ export const adminLogin = createAsyncThunk('auth/adminLogin', async (data, { rej
   try {
     const res = await adminAPI.login(data);
     const { access, user } = res.data;
-    if (user.role !== 'admin') throw new Error('Unauthorized');
+    if (user.role !== 'admin') return rejectWithValue({ error: `Access denied. Role: ${user.role}` });
     localStorage.setItem('admin_token', access);
     localStorage.setItem('admin_user', JSON.stringify(user));
     return { user, token: access };
   } catch (err) {
-    return rejectWithValue(err.response?.data || { error: 'Login failed' });
+    const msg = err.response?.data?.detail
+      || err.response?.data?.error
+      || err.message
+      || 'Network error — check backend URL';
+    console.error('Admin login error:', err.response?.status, msg, err);
+    return rejectWithValue({ error: msg });
   }
 });
 
