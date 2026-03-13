@@ -56,7 +56,9 @@ export default function Discover() {
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header & Search */}
         <div className="mb-8">
-          <h1 className="font-display font-bold text-3xl text-white mb-6">{t('discover.title')}</h1>
+          <h1 className="font-display font-bold text-3xl text-white mb-6">
+            {searchParams.get('city') ? `📍 ${searchParams.get('city')}` : t('discover.title')}
+          </h1>
           <form onSubmit={handleSearch} className="flex gap-3">
             <input
               type="text"
@@ -72,25 +74,6 @@ export default function Discover() {
         <div className="flex flex-col lg:flex-row gap-8">
           {/* Sidebar Filters */}
           <aside className="w-full lg:w-64 flex-shrink-0 space-y-6">
-            {/* City */}
-            <div className="card p-4">
-              <h3 className="text-sm font-medium text-white mb-3">📍 {t('discover.city')}</h3>
-              <div className="space-y-2">
-                {CITIES.map((c) => (
-                  <button
-                    key={c}
-                    onClick={() => updateFilter('city', searchParams.get('city') === c ? '' : c)}
-                    className={`w-full text-left px-3 py-2 rounded-lg text-sm transition-colors ${
-                      searchParams.get('city') === c
-                        ? 'bg-primary/20 text-primary font-medium'
-                        : 'text-gray-400 hover:text-white'
-                    }`}
-                  >
-                    {c}
-                  </button>
-                ))}
-              </div>
-            </div>
 
             {/* Open now */}
             <div className="card p-4">
