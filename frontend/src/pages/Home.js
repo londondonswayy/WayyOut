@@ -143,7 +143,7 @@ export default function Home() {
             <h2 className="font-display font-bold text-2xl text-white">{t('home.stories.title')}</h2>
             <p className="text-gray-500 text-sm">{t('home.stories.desc')}</p>
           </div>
-          <Link to="/discover" className="text-primary text-sm hover:underline">{t('home.stories.viewAll')}</Link>
+          <Link to="/stories" className="text-primary text-sm hover:underline">{t('home.stories.viewAll')}</Link>
         </div>
         <StoriesFeed city={city} />
       </section>
