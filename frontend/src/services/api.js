@@ -97,6 +97,7 @@ export const storyAPI = {
 
 // AI
 export const aiAPI = {
+  chat: (data) => api.post('/ai/chat/', data),
   discover: (data) => api.post('/ai/discover/', data),
   trending: (params) => api.get('/ai/trending/', { params }),
 };

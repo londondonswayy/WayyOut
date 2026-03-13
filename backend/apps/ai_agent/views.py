@@ -1,14 +1,37 @@
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.response import Response
 from rest_framework import permissions, status
-from .agent import get_ai_recommendations
+from .agent import get_ai_recommendations, get_ai_chat_response
+
+
+@api_view(['POST'])
+@permission_classes([permissions.AllowAny])
+def ai_chat(request):
+    """
+    Multi-turn AI chatbot endpoint.
+    Body: { messages: [{role, content}, ...], city?, lat?, lng? }
+    """
+    messages = request.data.get('messages', [])
+    if not messages or not isinstance(messages, list):
+        return Response({'error': 'messages array is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    last = messages[-1]
+    if not last.get('content', '').strip():
+        return Response({'error': 'Last message content is required.'}, status=status.HTTP_400_BAD_REQUEST)
+
+    city = request.data.get('city')
+    lat = request.data.get('lat')
+    lng = request.data.get('lng')
+
+    result = get_ai_chat_response(messages, city=city, lat=lat, lng=lng)
+    return Response(result)
 
 
 @api_view(['POST'])
 @permission_classes([permissions.AllowAny])
 def ai_discover(request):
     """
-    AI-powered venue discovery endpoint.
+    AI-powered venue discovery endpoint (legacy).
     Body: { query, city, lat, lng }
     """
     query = request.data.get('query', '').strip()
