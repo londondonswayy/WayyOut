@@ -1,4 +1,5 @@
 from django.core.management.base import BaseCommand
+from django.core.cache import cache
 from apps.users.models import User
 
 
@@ -25,6 +26,9 @@ class Command(BaseCommand):
         user.is_active = True
         user.set_password(password)
         user.save()
+
+        # Clear any login lockout for this email
+        cache.delete(f'login_attempts:email:{email}')
 
         action = 'Created' if created else 'Reset'
         self.stdout.write(self.style.SUCCESS(
