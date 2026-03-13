@@ -8,7 +8,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **kwargs):
         email = 'admin@wayyout.app'
-        password = 'WayyOut2024!'
+        password = 'WayyOut2024'
 
         user, created = User.objects.get_or_create(
             email=email,
