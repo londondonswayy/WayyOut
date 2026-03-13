@@ -14,6 +14,7 @@ export default function Navbar() {
   const { aiChatOpen } = useSelector((state) => state.ui);
   const { t, lang, switchLang } = useTranslation();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [mobileOpen, setMobileOpen] = useState(false);
   const [unread, setUnread] = useState(0);
 
   useEffect(() => {
@@ -22,10 +23,14 @@ export default function Navbar() {
     }
   }, [isAuthenticated, location.pathname]);
 
+  // Close mobile menu on route change
+  useEffect(() => { setMobileOpen(false); setMenuOpen(false); }, [location.pathname]);
+
   const handleLogout = () => {
     dispatch(logout());
     navigate('/');
     setMenuOpen(false);
+    setMobileOpen(false);
   };
 
   const isActive = (path) => location.pathname === path;
@@ -36,7 +41,7 @@ export default function Navbar() {
         <div className="flex items-center justify-between h-16">
 
           {/* Logo */}
-          <Link to="/" className="flex items-center space-x-2" onClick={() => setMenuOpen(false)}>
+          <Link to="/" className="flex items-center space-x-2">
             <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shadow-lg shadow-primary/30">
               <span className="text-white font-display font-bold text-sm">W</span>
             </div>
@@ -114,13 +119,76 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Link to="/login" className="text-sm font-medium text-gray-400 hover:text-white transition-colors">{t('nav.signIn')}</Link>
-                <Link to="/register" className="btn-primary text-sm py-2 px-4">{t('nav.getStarted')}</Link>
+                <Link to="/login" className="hidden sm:block text-sm font-medium text-gray-400 hover:text-white transition-colors">{t('nav.signIn')}</Link>
+                <Link to="/register" className="hidden sm:block btn-primary text-sm py-2 px-4">{t('nav.getStarted')}</Link>
               </>
             )}
+
+            {/* Mobile hamburger */}
+            <button
+              onClick={() => setMobileOpen(!mobileOpen)}
+              className="md:hidden p-2 rounded-lg text-gray-400 hover:text-white hover:bg-dark-border transition-colors"
+              aria-label="Menu"
+            >
+              {mobileOpen ? (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
           </div>
         </div>
       </div>
+
+      {/* Mobile menu */}
+      {mobileOpen && (
+        <div className="md:hidden border-t border-dark-border bg-dark/95 backdrop-blur-xl px-4 py-4 space-y-1">
+          <Link to="/" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
+            🏠 {t('nav.home')}
+          </Link>
+          <Link to="/discover" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/discover') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
+            🔍 {t('nav.discover')}
+          </Link>
+          {isAuthenticated ? (
+            <>
+              {user?.role === 'venue_owner' && (
+                <Link to="/venue-dashboard" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/venue-dashboard') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
+                  🏢 {t('nav.myVenues')}
+                </Link>
+              )}
+              <Link to="/profile" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
+                👤 {t('nav.profile')}
+              </Link>
+              <Link to="/reservations" className="block px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:text-white hover:bg-dark-border transition-colors">
+                📋 {t('nav.reservations')}
+              </Link>
+              <button
+                onClick={() => dispatch(toggleAIChat())}
+                className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-purple-400 hover:text-purple-300 hover:bg-dark-border transition-colors"
+              >
+                ✨ {t('nav.aiGuide')}
+              </button>
+              <hr className="border-dark-border my-2" />
+              <button onClick={handleLogout} className="w-full text-left px-3 py-2.5 rounded-lg text-sm font-medium text-red-400 hover:text-red-300 hover:bg-dark-border transition-colors">
+                {t('nav.signOut')}
+              </button>
+            </>
+          ) : (
+            <div className="flex gap-3 pt-2">
+              <Link to="/login" className="flex-1 text-center py-2.5 rounded-lg border border-dark-border text-sm font-medium text-gray-300 hover:text-white hover:border-primary/50 transition-colors">
+                {t('nav.signIn')}
+              </Link>
+              <Link to="/register" className="flex-1 text-center btn-primary text-sm py-2.5">
+                {t('nav.getStarted')}
+              </Link>
+            </div>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { useDispatch } from 'react-redux';
 import { openReservationModal } from '../store/slices/uiSlice';
 import { useTranslation } from '../i18n/LanguageContext';
+import { toast } from 'react-toastify';
 
 const VIBE_COLORS = {
   casual: 'bg-blue-500/20 text-blue-400',
@@ -51,6 +52,12 @@ export default function VenueCard({ venue }) {
     setSaved(next);
     setHeartBounce(true);
     setTimeout(() => setHeartBounce(false), 400);
+    toast(next ? `Saved ${venue.name}` : `Removed ${venue.name}`, {
+      icon: next ? '❤️' : '🤍',
+      position: 'bottom-center',
+      autoClose: 1500,
+      hideProgressBar: true,
+    });
     try {
       const all = JSON.parse(localStorage.getItem('saved_venues') || '[]');
       const updated = next ? [...all, venue.id] : all.filter((id) => id !== venue.id);
@@ -61,7 +68,7 @@ export default function VenueCard({ venue }) {
   return (
     <div className="card group hover:border-primary/50 transition-all duration-300 hover:-translate-y-1">
       {/* Image */}
-      <div className="relative h-48 overflow-hidden bg-dark-border">
+      <div className="relative h-48 overflow-hidden bg-dark-border rounded-t-xl">
         {venue.cover_image ? (
           <img
             src={venue.cover_image}
@@ -70,7 +77,13 @@ export default function VenueCard({ venue }) {
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-primary/20 to-accent-purple/20 flex items-center justify-center">
-            <span className="text-4xl">🏢</span>
+            <span className="text-5xl opacity-60">
+              {venue.category?.name === 'Rooftop' ? '🏙️' :
+               venue.category?.name === 'Nightclub' ? '🎉' :
+               venue.category?.name === 'Restaurant' ? '🍽️' :
+               venue.category?.name === 'Lounge' ? '🛋️' :
+               venue.category?.name === 'Live Music' ? '🎵' : '🏢'}
+            </span>
           </div>
         )}
 
@@ -82,18 +95,18 @@ export default function VenueCard({ venue }) {
             <span className="badge-closed">{t('venue.closed')}</span>
           )}
           {venue.is_featured && (
-            <span className="badge bg-accent-gold/20 text-yellow-400">{t('venue.featured')}</span>
+            <span className="badge bg-yellow-500/20 text-yellow-400 border border-yellow-500/30">⭐ {t('venue.featured')}</span>
           )}
         </div>
 
         {/* Heart save button */}
         <button
           onClick={toggleSave}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/70"
+          className="absolute top-3 right-3 w-9 h-9 rounded-full bg-black/50 backdrop-blur-sm flex items-center justify-center transition-all hover:bg-black/70 hover:scale-110"
           title={saved ? 'Remove from saved' : 'Save venue'}
         >
           <span
-            className={`text-lg transition-transform ${heartBounce ? 'scale-150' : 'scale-100'} ${saved ? 'text-red-500' : 'text-white/60 hover:text-white'}`}
+            className={`text-lg transition-transform ${heartBounce ? 'scale-150' : 'scale-100'}`}
             style={{ transition: 'transform 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97)' }}
           >
             {saved ? '❤️' : '🤍'}
@@ -103,7 +116,7 @@ export default function VenueCard({ venue }) {
         {/* Live viewer count */}
         {venue.is_open && (
           <div className="absolute bottom-3 left-3">
-            <span className="flex items-center gap-1 text-xs text-white/80 bg-black/50 backdrop-blur-sm px-2 py-1 rounded-full">
+            <span className="flex items-center gap-1.5 text-xs text-white/90 bg-black/60 backdrop-blur-sm px-2.5 py-1 rounded-full font-medium">
               <span className="w-1.5 h-1.5 bg-red-400 rounded-full animate-pulse" />
               {viewerCount} {t('venue.viewing')}
             </span>
@@ -112,45 +125,49 @@ export default function VenueCard({ venue }) {
 
         {venue.category && (
           <div className="absolute bottom-3 right-3">
-            <span className="badge bg-dark/80 text-gray-300">{venue.category.name}</span>
+            <span className="badge bg-black/60 backdrop-blur-sm text-gray-200 border-0">
+              {venue.category.icon} {venue.category.name}
+            </span>
           </div>
         )}
       </div>
 
       {/* Content */}
       <div className="p-4 space-y-3">
-        <div className="flex items-start justify-between">
-          <div>
-            <h3 className="font-display font-semibold text-white text-lg leading-tight">{venue.name}</h3>
-            <p className="text-gray-500 text-sm mt-0.5">{venue.city} · {venue.address?.split(',')[0]}</p>
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <h3 className="font-display font-semibold text-white text-lg leading-tight truncate">{venue.name}</h3>
+            <p className="text-gray-500 text-sm mt-0.5 truncate">📍 {venue.city} · {venue.address?.split(',')[0]}</p>
           </div>
-          <div className="text-right">
+          <div className="text-right flex-shrink-0">
             <div className="flex items-center space-x-1 text-yellow-400">
               <span>★</span>
-              <span className="text-sm font-medium">{Number(venue.rating).toFixed(1)}</span>
+              <span className="text-sm font-semibold">{Number(venue.rating).toFixed(1)}</span>
             </div>
-            <span className="text-xs text-gray-600">({venue.review_count})</span>
+            <span className="text-xs text-gray-600">{venue.review_count} reviews</span>
           </div>
         </div>
 
         {/* Vibe tag */}
         {venue.vibe && (
-          <span className={`badge ${VIBE_COLORS[venue.vibe] || 'bg-gray-500/20 text-gray-400'}`}>
+          <span className={`badge capitalize ${VIBE_COLORS[venue.vibe] || 'bg-gray-500/20 text-gray-400'}`}>
             {venue.vibe}
           </span>
         )}
 
-        {/* Busy level */}
-        {venue.is_open && (
+        {/* Busy level (open) or closed message */}
+        {venue.is_open ? (
           <div>
             <div className="flex justify-between text-xs text-gray-500 mb-1">
-              <span>Busy level</span>
-              <span className={venue.busy_level > 70 ? 'text-red-400' : venue.busy_level > 40 ? 'text-yellow-400' : 'text-green-400'}>
+              <span>{t('venue.busyLevel') || 'Crowd'}</span>
+              <span className={venue.busy_level > 70 ? 'text-red-400 font-medium' : venue.busy_level > 40 ? 'text-yellow-400 font-medium' : 'text-green-400 font-medium'}>
                 {venue.busy_level > 70 ? t('venue.packed') : venue.busy_level > 40 ? t('venue.moderate') : t('venue.quiet')}
               </span>
             </div>
             <BusyBar level={venue.busy_level} />
           </div>
+        ) : (
+          <p className="text-xs text-gray-600 italic">Opens later tonight</p>
         )}
 
         {/* Distance */}
@@ -162,18 +179,25 @@ export default function VenueCard({ venue }) {
         <div className="flex gap-2 pt-1">
           <Link
             to={`/venue/${venue.slug}`}
-            className="flex-1 btn-ghost text-sm py-2 text-center"
+            className="flex-1 btn-ghost text-sm py-2.5 text-center font-medium"
           >
             {t('venue.view')}
           </Link>
-          {venue.is_open && (
-            <button
-              onClick={() => dispatch(openReservationModal(venue))}
-              className="flex-1 btn-primary text-sm py-2"
-            >
-              {t('venue.reserve')}
-            </button>
-          )}
+          <button
+            onClick={() => venue.is_open
+              ? dispatch(openReservationModal(venue))
+              : null
+            }
+            className={`flex-1 text-sm py-2.5 rounded-xl font-medium transition-all ${
+              venue.is_open
+                ? 'btn-primary'
+                : 'bg-dark-border text-gray-500 cursor-not-allowed'
+            }`}
+            disabled={!venue.is_open}
+            title={venue.is_open ? '' : 'Venue is currently closed'}
+          >
+            {venue.is_open ? t('venue.reserve') : t('venue.closed')}
+          </button>
         </div>
       </div>
     </div>

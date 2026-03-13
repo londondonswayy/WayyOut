@@ -32,6 +32,7 @@ export default function Home() {
   const [city] = useState('');
   const [feedAd, setFeedAd] = useState(null);
   const [dismissedAd, setDismissedAd] = useState(false);
+  const [heroSearch, setHeroSearch] = useState('');
 
   // Build ticker from translation keys
   const LIVE_ACTIVITIES = Array.from({ length: 10 }, (_, i) => t(`ticker.${i}`));
@@ -63,8 +64,25 @@ export default function Home() {
             {t('home.hero.desc')}
           </p>
 
+          {/* Search bar */}
+          <form
+            onSubmit={(e) => { e.preventDefault(); if (heroSearch.trim()) navigate(`/discover?search=${encodeURIComponent(heroSearch.trim())}`); }}
+            className="flex gap-2 max-w-xl mx-auto mb-8"
+          >
+            <input
+              type="text"
+              value={heroSearch}
+              onChange={(e) => setHeroSearch(e.target.value)}
+              placeholder={t('discover.placeholder')}
+              className="input flex-1 text-base py-3 px-5"
+            />
+            <button type="submit" className="btn-primary px-6 py-3 text-base">
+              {t('discover.search')}
+            </button>
+          </form>
+
           {/* City picker */}
-          <p className="text-gray-500 text-sm mb-5">{t('home.search.chooseCity')}</p>
+          <p className="text-gray-500 text-sm mb-4">{t('home.search.chooseCity')}</p>
           <div className="flex gap-4 justify-center mb-8">
             {CITIES.map((c) => (
               <Link
