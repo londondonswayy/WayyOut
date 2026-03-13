@@ -89,9 +89,11 @@ export const reservationAPI = {
 // Stories
 export const storyAPI = {
   feed: (params) => api.get('/stories/', { params }),
+  socialFeed: (params) => api.get('/stories/feed/social/', { params }),
   create: (data) => api.post('/stories/create/', data),
   delete: (id) => api.delete(`/stories/${id}/`),
   view: (id) => api.post(`/stories/${id}/view/`),
+  like: (id) => api.post(`/stories/${id}/like/`),
   repost: (id, venueId) => api.post(`/stories/${id}/repost/`, { venue_id: venueId }),
 };
 

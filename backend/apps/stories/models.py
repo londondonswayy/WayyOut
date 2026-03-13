@@ -74,3 +74,13 @@ class StoryRepost(models.Model):
 
     class Meta:
         db_table = 'story_reposts'
+
+
+class StoryLike(models.Model):
+    story = models.ForeignKey(Story, on_delete=models.CASCADE, related_name='likes')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='story_likes')
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        db_table = 'story_likes'
+        unique_together = ['story', 'user']

@@ -18,6 +18,7 @@ import VenueOwnerDashboard from './pages/VenueOwnerDashboard';
 import StoriesPage from './pages/StoriesPage';
 import Friends from './pages/Friends';
 import Messages from './pages/Messages';
+import Feed from './pages/Feed';
 
 function PrivateRoute({ children }) {
   const { isAuthenticated } = useSelector((state) => state.auth);
@@ -63,6 +64,7 @@ export default function App() {
         <Route path="/profile" element={<PrivateRoute><UserProfile /></PrivateRoute>} />
         <Route path="/reservations" element={<PrivateRoute><Reservations /></PrivateRoute>} />
         <Route path="/stories" element={<StoriesPage />} />
+        <Route path="/feed" element={<Feed />} />
         <Route path="/friends" element={<PrivateRoute><Friends /></PrivateRoute>} />
         <Route path="/messages" element={<PrivateRoute><Messages /></PrivateRoute>} />
         <Route path="/venue-dashboard" element={<VenueOwnerRoute><VenueOwnerDashboard /></VenueOwnerRoute>} />

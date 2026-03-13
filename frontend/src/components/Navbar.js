@@ -51,6 +51,7 @@ export default function Navbar() {
           {/* Desktop Nav */}
           <div className="hidden md:flex items-center space-x-6">
             <Link to="/" className={`text-sm font-medium transition-colors ${isActive('/') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.home')}</Link>
+            <Link to="/feed" className={`text-sm font-medium transition-colors ${isActive('/feed') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>Feed</Link>
             <Link to="/discover" className={`text-sm font-medium transition-colors ${isActive('/discover') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.discover')}</Link>
             {isAuthenticated && user?.role === 'venue_owner' && (
               <Link to="/venue-dashboard" className={`text-sm font-medium transition-colors ${isActive('/venue-dashboard') ? 'text-primary' : 'text-gray-400 hover:text-white'}`}>{t('nav.myVenues')}</Link>
@@ -158,6 +159,9 @@ export default function Navbar() {
         <div className="md:hidden border-t border-dark-border bg-dark/95 backdrop-blur-xl px-4 py-4 space-y-1">
           <Link to="/" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
             🏠 {t('nav.home')}
+          </Link>
+          <Link to="/feed" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/feed') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
+            📱 Feed
           </Link>
           <Link to="/discover" className={`block px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${isActive('/discover') ? 'bg-primary/10 text-primary' : 'text-gray-300 hover:text-white hover:bg-dark-border'}`}>
             🔍 {t('nav.discover')}
