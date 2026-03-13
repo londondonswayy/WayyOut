@@ -54,7 +54,7 @@ export default function Home() {
         <div className="absolute top-1/4 left-1/4 w-96 h-96 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-96 h-96 bg-accent-purple/10 rounded-full blur-3xl pointer-events-none" />
 
-        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto pt-16 md:pt-24">
+        <div className="relative z-10 text-center px-4 max-w-5xl mx-auto pt-8 md:pt-12">
           <h1 className="font-display font-bold text-4xl md:text-5xl text-white mb-6 leading-tight">
             {t('home.hero.title')}<br />
             <span className="text-primary">{t('home.hero.highlight')}</span>
